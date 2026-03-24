@@ -1,0 +1,3248 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>UltraGravity — Product Requirements Document</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=JetBrains+Mono:wght@300;400;500;700&family=Instrument+Serif:ital@0;1&display=swap"
+    rel="stylesheet">
+  <style>
+    :root {
+      --void: #040508;
+      --deep: #080c12;
+      --surface: #0d1420;
+      --panel: #111827;
+      --panel-alt: #141e2e;
+      --border: rgba(255, 255, 255, 0.06);
+      --border-bright: rgba(255, 255, 255, 0.12);
+      --plasma: #00f5d4;
+      --plasma-dim: rgba(0, 245, 212, 0.15);
+      --plasma-glow: rgba(0, 245, 212, 0.08);
+      --amber: #f5a623;
+      --amber-dim: rgba(245, 166, 35, 0.15);
+      --crimson: #ff3d6e;
+      --crimson-dim: rgba(255, 61, 110, 0.12);
+      --violet: #7c3aed;
+      --violet-dim: rgba(124, 58, 237, 0.15);
+      --text: #e8edf5;
+      --text-dim: rgba(232, 237, 245, 0.6);
+      --text-muted: rgba(232, 237, 245, 0.35);
+      --code-bg: rgba(0, 245, 212, 0.04);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      background: var(--void);
+      color: var(--text);
+      font-family: 'Syne', sans-serif;
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    /* ─── NOISE OVERLAY ─── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 1000;
+      opacity: 0.4;
+    }
+
+    /* ─── SIDEBAR NAV ─── */
+    .nav {
+      position: fixed;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 240px;
+      background: var(--deep);
+      border-right: 1px solid var(--border);
+      padding: 32px 0;
+      overflow-y: auto;
+      z-index: 100;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .nav-brand {
+      padding: 0 24px 32px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 16px;
+    }
+
+    .nav-brand-name {
+      font-size: 18px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      color: var(--plasma);
+      display: block;
+    }
+
+    .nav-brand-sub {
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: 3px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      margin-top: 2px;
+      display: block;
+    }
+
+    .nav-section-label {
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      padding: 16px 24px 8px;
+      display: block;
+    }
+
+    .nav a {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 24px;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-dim);
+      text-decoration: none;
+      transition: all 0.15s;
+      letter-spacing: 0.2px;
+    }
+
+    .nav a:hover {
+      color: var(--plasma);
+      background: var(--plasma-glow);
+      padding-left: 28px;
+    }
+
+    .nav a .dot {
+      width: 4px;
+      height: 4px;
+      border-radius: 50%;
+      background: var(--border-bright);
+      flex-shrink: 0;
+      transition: background 0.15s;
+    }
+
+    .nav a:hover .dot {
+      background: var(--plasma);
+    }
+
+    /* ─── MAIN CONTENT ─── */
+    .main {
+      margin-left: 240px;
+      min-height: 100vh;
+    }
+
+    /* ─── HERO ─── */
+    .hero {
+      position: relative;
+      padding: 120px 80px 100px;
+      overflow: hidden;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .hero-grid {
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(0, 245, 212, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 245, 212, 0.03) 1px, transparent 1px);
+      background-size: 48px 48px;
+      mask-image: radial-gradient(ellipse at 30% 50%, black 30%, transparent 70%);
+    }
+
+    .hero-glow {
+      position: absolute;
+      top: -200px;
+      left: -100px;
+      width: 700px;
+      height: 700px;
+      background: radial-gradient(circle, rgba(0, 245, 212, 0.06) 0%, transparent 60%);
+      pointer-events: none;
+    }
+
+    .hero-glow-2 {
+      position: absolute;
+      bottom: -300px;
+      right: -200px;
+      width: 800px;
+      height: 800px;
+      background: radial-gradient(circle, rgba(124, 58, 237, 0.05) 0%, transparent 60%);
+      pointer-events: none;
+    }
+
+    .hero-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--plasma);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      border: 1px solid rgba(0, 245, 212, 0.2);
+      padding: 6px 14px;
+      border-radius: 2px;
+      background: var(--plasma-glow);
+      margin-bottom: 40px;
+    }
+
+    .hero-tag::before {
+      content: '';
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--plasma);
+      animation: pulse 2s ease infinite;
+    }
+
+    @keyframes pulse {
+
+      0%,
+      100% {
+        opacity: 1;
+        transform: scale(1);
+      }
+
+      50% {
+        opacity: 0.4;
+        transform: scale(0.7);
+      }
+    }
+
+    .hero h1 {
+      font-size: clamp(52px, 7vw, 96px);
+      font-weight: 800;
+      letter-spacing: -3px;
+      line-height: 0.95;
+      position: relative;
+    }
+
+    .hero h1 .word-ultra {
+      display: block;
+      color: var(--text);
+    }
+
+    .hero h1 .word-gravity {
+      display: block;
+      color: var(--plasma);
+      -webkit-text-stroke: 1px rgba(0, 245, 212, 0.3);
+    }
+
+    .hero-sub {
+      font-family: 'Instrument Serif', serif;
+      font-size: 22px;
+      font-style: italic;
+      color: var(--text-dim);
+      max-width: 580px;
+      margin-top: 32px;
+      line-height: 1.5;
+    }
+
+    .hero-meta {
+      display: flex;
+      gap: 40px;
+      margin-top: 60px;
+      flex-wrap: wrap;
+    }
+
+    .hero-meta-item {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .hero-meta-label {
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 2.5px;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .hero-meta-value {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-dim);
+    }
+
+    /* ─── SECTIONS ─── */
+    .section {
+      padding: 80px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .section:nth-child(even) {
+      background: rgba(255, 255, 255, 0.01);
+    }
+
+    .section-label {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 48px;
+    }
+
+    .section-number {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      color: var(--plasma);
+      opacity: 0.7;
+      font-weight: 500;
+      letter-spacing: 1px;
+    }
+
+    .section-tag {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+
+    .section-line {
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    .section h2 {
+      font-size: clamp(32px, 4vw, 52px);
+      font-weight: 800;
+      letter-spacing: -1.5px;
+      line-height: 1.05;
+      margin-bottom: 24px;
+    }
+
+    .section h2 em {
+      font-style: normal;
+      color: var(--plasma);
+    }
+
+    .section h3 {
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      color: var(--text);
+      margin: 48px 0 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .section h3::before {
+      content: '';
+      display: block;
+      width: 3px;
+      height: 20px;
+      background: var(--plasma);
+      border-radius: 2px;
+      flex-shrink: 0;
+    }
+
+    .section h4 {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--amber);
+      letter-spacing: 0.3px;
+      margin: 28px 0 10px;
+    }
+
+    .lead {
+      font-size: 17px;
+      color: var(--text-dim);
+      max-width: 720px;
+      line-height: 1.7;
+      margin-bottom: 48px;
+      font-family: 'Instrument Serif', serif;
+      font-size: 19px;
+    }
+
+    p {
+      font-size: 14px;
+      color: var(--text-dim);
+      line-height: 1.8;
+      max-width: 760px;
+      margin-bottom: 16px;
+    }
+
+    /* ─── COMPARISON TABLE ─── */
+    .compare-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 32px 0;
+      font-size: 13px;
+    }
+
+    .compare-table th {
+      text-align: left;
+      padding: 12px 20px;
+      background: var(--surface);
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 2.5px;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      font-family: 'JetBrains Mono', monospace;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .compare-table th:nth-child(2) {
+      color: rgba(255, 255, 255, 0.25);
+    }
+
+    .compare-table th:nth-child(3) {
+      color: var(--plasma);
+    }
+
+    .compare-table td {
+      padding: 14px 20px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text-dim);
+      vertical-align: top;
+    }
+
+    .compare-table td:first-child {
+      font-weight: 600;
+      color: var(--text);
+      font-size: 12px;
+    }
+
+    .compare-table td:nth-child(2) {
+      color: rgba(232, 237, 245, 0.35);
+    }
+
+    .compare-table td:nth-child(3) {
+      color: var(--plasma);
+      font-weight: 500;
+    }
+
+    .compare-table tr:hover td {
+      background: rgba(255, 255, 255, 0.015);
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 2px;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .badge-plasma {
+      background: var(--plasma-dim);
+      color: var(--plasma);
+      border: 1px solid rgba(0, 245, 212, 0.2);
+    }
+
+    .badge-amber {
+      background: var(--amber-dim);
+      color: var(--amber);
+      border: 1px solid rgba(245, 166, 35, 0.2);
+    }
+
+    .badge-crimson {
+      background: var(--crimson-dim);
+      color: var(--crimson);
+      border: 1px solid rgba(255, 61, 110, 0.2);
+    }
+
+    .badge-violet {
+      background: var(--violet-dim);
+      color: #a78bfa;
+      border: 1px solid rgba(124, 58, 237, 0.2);
+    }
+
+    /* ─── ARCH DIAGRAM ─── */
+    .arch-diagram {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 48px;
+      margin: 40px 0;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .arch-diagram::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, var(--plasma), var(--violet), transparent);
+    }
+
+    .arch-layers {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+
+    .arch-layer {
+      display: grid;
+      grid-template-columns: 160px 1fr;
+      gap: 0;
+      border: 1px solid var(--border);
+    }
+
+    .arch-layer+.arch-layer {
+      border-top: none;
+    }
+
+    .arch-layer-name {
+      padding: 20px 24px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      background: var(--panel);
+      border-right: 1px solid var(--border);
+    }
+
+    .arch-layer-num {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+    }
+
+    .arch-layer-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .arch-layer-body {
+      padding: 16px 24px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .arch-chip {
+      padding: 6px 12px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border);
+      border-radius: 2px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      color: var(--text-dim);
+      white-space: nowrap;
+    }
+
+    .arch-chip.plasma {
+      border-color: rgba(0, 245, 212, 0.3);
+      color: var(--plasma);
+      background: var(--plasma-glow);
+    }
+
+    .arch-chip.amber {
+      border-color: rgba(245, 166, 35, 0.3);
+      color: var(--amber);
+      background: var(--amber-dim);
+    }
+
+    .arch-chip.violet {
+      border-color: rgba(124, 58, 237, 0.3);
+      color: #a78bfa;
+      background: var(--violet-dim);
+    }
+
+    .arch-chip.crimson {
+      border-color: rgba(255, 61, 110, 0.3);
+      color: var(--crimson);
+      background: var(--crimson-dim);
+    }
+
+    /* ─── FLOW DIAGRAM ─── */
+    .flow {
+      display: flex;
+      align-items: stretch;
+      gap: 0;
+      margin: 32px 0;
+      overflow-x: auto;
+      padding-bottom: 8px;
+    }
+
+    .flow-step {
+      flex: 1;
+      min-width: 140px;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    .flow-step-inner {
+      border: 1px solid var(--border);
+      padding: 20px 16px;
+      background: var(--surface);
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .flow-step+.flow-step .flow-step-inner {
+      border-left: none;
+    }
+
+    .flow-num {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      color: var(--text-muted);
+    }
+
+    .flow-name {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .flow-desc {
+      font-size: 11px;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+
+    .flow-step.active .flow-step-inner {
+      background: var(--plasma-glow);
+      border-color: rgba(0, 245, 212, 0.2);
+    }
+
+    .flow-step.active .flow-name {
+      color: var(--plasma);
+    }
+
+    /* ─── CODE BLOCKS ─── */
+    .code-block {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      margin: 24px 0;
+      overflow: hidden;
+    }
+
+    .code-block-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 16px;
+      background: var(--panel-alt);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .code-block-title {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      color: var(--text-muted);
+      letter-spacing: 0.5px;
+    }
+
+    .code-block-lang {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      color: var(--plasma);
+      opacity: 0.7;
+    }
+
+    .code-block pre {
+      padding: 24px;
+      overflow-x: auto;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      line-height: 1.7;
+      color: var(--text-dim);
+    }
+
+    .code-block pre .k {
+      color: #a78bfa;
+    }
+
+    .code-block pre .t {
+      color: var(--plasma);
+    }
+
+    .code-block pre .s {
+      color: var(--amber);
+    }
+
+    .code-block pre .c {
+      color: var(--text-muted);
+      font-style: italic;
+    }
+
+    .code-block pre .n {
+      color: #f472b6;
+    }
+
+    .code-block pre .v {
+      color: #fb923c;
+    }
+
+    /* ─── CARDS ─── */
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1px;
+      background: var(--border);
+      margin: 32px 0;
+    }
+
+    .card {
+      background: var(--surface);
+      padding: 28px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .card-icon {
+      font-size: 24px;
+      width: 44px;
+      height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--plasma-glow);
+      border: 1px solid rgba(0, 245, 212, 0.15);
+      border-radius: 4px;
+    }
+
+    .card-icon.amber {
+      background: var(--amber-dim);
+      border-color: rgba(245, 166, 35, 0.2);
+    }
+
+    .card-icon.violet {
+      background: var(--violet-dim);
+      border-color: rgba(124, 58, 237, 0.2);
+    }
+
+    .card-icon.crimson {
+      background: var(--crimson-dim);
+      border-color: rgba(255, 61, 110, 0.2);
+    }
+
+    .card h4 {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text);
+      margin: 0;
+    }
+
+    .card p {
+      font-size: 13px;
+      color: var(--text-dim);
+      line-height: 1.6;
+      margin: 0;
+    }
+
+    /* ─── SPEC TABLE ─── */
+    .spec-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1px;
+      background: var(--border);
+      margin: 24px 0;
+    }
+
+    .spec-item {
+      background: var(--surface);
+      padding: 20px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .spec-label {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .spec-value {
+      font-size: 24px;
+      font-weight: 800;
+      color: var(--plasma);
+      letter-spacing: -1px;
+    }
+
+    .spec-desc {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    /* ─── CALLOUT ─── */
+    .callout {
+      border-left: 3px solid var(--plasma);
+      background: var(--plasma-glow);
+      padding: 20px 24px;
+      margin: 24px 0;
+      border-radius: 0 4px 4px 0;
+    }
+
+    .callout.amber {
+      border-color: var(--amber);
+      background: var(--amber-dim);
+    }
+
+    .callout.crimson {
+      border-color: var(--crimson);
+      background: var(--crimson-dim);
+    }
+
+    .callout.violet {
+      border-color: var(--violet);
+      background: var(--violet-dim);
+    }
+
+    .callout-title {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--plasma);
+      margin-bottom: 8px;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .callout.amber .callout-title {
+      color: var(--amber);
+    }
+
+    .callout.crimson .callout-title {
+      color: var(--crimson);
+    }
+
+    .callout.violet .callout-title {
+      color: #a78bfa;
+    }
+
+    .callout p {
+      font-size: 13px;
+      margin: 0;
+      max-width: none;
+    }
+
+    /* ─── SECURITY LAYERS ─── */
+    .security-ring {
+      margin: 40px 0;
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+
+    .sec-layer {
+      display: grid;
+      grid-template-columns: 48px 1fr;
+      gap: 0;
+      align-items: stretch;
+      border: 1px solid var(--border);
+      border-top: none;
+    }
+
+    .sec-layer:first-child {
+      border-top: 1px solid var(--border);
+    }
+
+    .sec-layer-num {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      font-weight: 700;
+      border-right: 1px solid var(--border);
+      color: var(--text-muted);
+    }
+
+    .sec-layer-body {
+      padding: 16px 24px;
+      display: flex;
+      align-items: baseline;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .sec-layer-name {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text);
+      min-width: 180px;
+    }
+
+    .sec-layer-desc {
+      font-size: 12px;
+      color: var(--text-muted);
+      flex: 1;
+    }
+
+    .sec-layer.L1 .sec-layer-name {
+      color: var(--crimson);
+    }
+
+    .sec-layer.L2 .sec-layer-name {
+      color: var(--amber);
+    }
+
+    .sec-layer.L3 .sec-layer-name {
+      color: #f59e0b;
+    }
+
+    .sec-layer.L4 .sec-layer-name {
+      color: #a78bfa;
+    }
+
+    .sec-layer.L5 .sec-layer-name {
+      color: var(--plasma);
+    }
+
+    .sec-layer.L6 .sec-layer-name {
+      color: #34d399;
+    }
+
+    /* ─── TIMELINE ─── */
+    .timeline {
+      position: relative;
+      margin: 32px 0;
+      padding-left: 32px;
+    }
+
+    .timeline::before {
+      content: '';
+      position: absolute;
+      left: 7px;
+      top: 0;
+      bottom: 0;
+      width: 1px;
+      background: var(--border-bright);
+    }
+
+    .timeline-item {
+      position: relative;
+      padding: 0 0 32px;
+      padding-left: 24px;
+    }
+
+    .timeline-item::before {
+      content: '';
+      position: absolute;
+      left: -25px;
+      top: 6px;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--plasma);
+      border: 2px solid var(--void);
+    }
+
+    .timeline-phase {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--plasma);
+      font-family: 'JetBrains Mono', monospace;
+      margin-bottom: 8px;
+    }
+
+    .timeline-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 8px;
+    }
+
+    .timeline-body {
+      font-size: 13px;
+      color: var(--text-dim);
+      line-height: 1.7;
+    }
+
+    /* ─── FOOTER ─── */
+    .footer {
+      padding: 48px 80px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .footer-brand {
+      font-size: 20px;
+      font-weight: 800;
+      color: var(--plasma);
+      letter-spacing: -0.5px;
+    }
+
+    .footer-meta {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      color: var(--text-muted);
+      text-align: right;
+      line-height: 1.7;
+    }
+
+    /* ─── SCROLLBAR ─── */
+    ::-webkit-scrollbar {
+      width: 4px;
+      height: 4px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: var(--void);
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: rgba(0, 245, 212, 0.2);
+      border-radius: 2px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(0, 245, 212, 0.4);
+    }
+
+    /* ─── FADE-IN ANIMATIONS ─── */
+    @keyframes fadeUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .hero>* {
+      animation: fadeUp 0.6s ease both;
+    }
+
+    .hero-tag {
+      animation-delay: 0.1s;
+    }
+
+    .hero h1 {
+      animation-delay: 0.2s;
+    }
+
+    .hero-sub {
+      animation-delay: 0.35s;
+    }
+
+    .hero-meta {
+      animation-delay: 0.5s;
+    }
+
+    /* ─── INLINE CODE ─── */
+    code {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      background: var(--code-bg);
+      border: 1px solid rgba(0, 245, 212, 0.1);
+      padding: 1px 6px;
+      border-radius: 2px;
+      color: var(--plasma);
+    }
+
+    ul,
+    ol {
+      padding-left: 20px;
+      margin-bottom: 16px;
+    }
+
+    li {
+      font-size: 13px;
+      color: var(--text-dim);
+      line-height: 1.8;
+      margin-bottom: 4px;
+    }
+
+    li strong {
+      color: var(--text);
+      font-weight: 600;
+    }
+
+    /* horizontal rule */
+    hr {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 40px 0;
+    }
+
+    /* ─── PERF BARS ─── */
+    .perf-compare {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      margin: 32px 0;
+    }
+
+    .perf-row {
+      display: grid;
+      grid-template-columns: 180px 1fr 80px;
+      gap: 16px;
+      align-items: center;
+    }
+
+    .perf-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-dim);
+    }
+
+    .perf-bars {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .perf-bar-wrap {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .perf-bar-label {
+      font-size: 9px;
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--text-muted);
+      width: 80px;
+      text-align: right;
+      flex-shrink: 0;
+    }
+
+    .perf-bar-track {
+      flex: 1;
+      height: 6px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+
+    .perf-bar-fill {
+      height: 100%;
+      border-radius: 3px;
+      background: var(--plasma);
+      transition: width 1s ease;
+    }
+
+    .perf-bar-fill.openclaw {
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    .perf-val {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      color: var(--plasma);
+      font-weight: 700;
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- SIDEBAR NAV -->
+  <nav class="nav">
+    <div class="nav-brand">
+      <span class="nav-brand-name">⚡ UltraGravity</span>
+      <span class="nav-brand-sub">Product Requirements Doc</span>
+    </div>
+
+    <span class="nav-section-label">Overview</span>
+    <a href="#vision"><span class="dot"></span> Vision & Mission</a>
+    <a href="#vs-openclaw"><span class="dot"></span> vs. OpenClaw</a>
+    <a href="#specs"><span class="dot"></span> Performance Targets</a>
+
+    <span class="nav-section-label">Architecture</span>
+    <a href="#arch-overview"><span class="dot"></span> System Architecture</a>
+    <a href="#gravity-core"><span class="dot"></span> GravityCore Engine</a>
+    <a href="#warp-queue"><span class="dot"></span> WarpQueue System</a>
+    <a href="#channels"><span class="dot"></span> Channel Adapters</a>
+    <a href="#intelligence"><span class="dot"></span> Intelligence Layer</a>
+
+    <span class="nav-section-label">Deep Dive</span>
+    <a href="#backend"><span class="dot"></span> Backend Internals</a>
+    <a href="#memory"><span class="dot"></span> Memory Architecture</a>
+    <a href="#skills"><span class="dot"></span> Skills Engine</a>
+    <a href="#multi-agent"><span class="dot"></span> Multi-Agent Mesh</a>
+    <a href="#workflow"><span class="dot"></span> End-to-End Workflow</a>
+
+    <span class="nav-section-label">Security</span>
+    <a href="#security"><span class="dot"></span> Security Architecture</a>
+    <a href="#threat-model"><span class="dot"></span> Threat Model</a>
+    <a href="#sandbox"><span class="dot"></span> Tool Sandboxing</a>
+
+    <span class="nav-section-label">Product</span>
+    <a href="#ux"><span class="dot"></span> User Experience</a>
+    <a href="#plugins"><span class="dot"></span> Plugin Ecosystem</a>
+    <a href="#deployment"><span class="dot"></span> Deployment</a>
+    <a href="#roadmap"><span class="dot"></span> Roadmap</a>
+  </nav>
+
+  <!-- MAIN CONTENT -->
+  <div class="main">
+
+    <!-- HERO -->
+    <header class="hero" id="top">
+      <div class="hero-grid"></div>
+      <div class="hero-glow"></div>
+      <div class="hero-glow-2"></div>
+
+      <div class="hero-tag">Confidential PRD — v0.1.0 Draft</div>
+
+      <h1>
+        <span class="word-ultra">ULTRA</span>
+        <span class="word-gravity">GRAVITY</span>
+      </h1>
+
+      <p class="hero-sub">The next-generation autonomous AI agent runtime. Faster, safer, and more extensible than
+        anything that exists today.</p>
+
+      <div class="hero-meta">
+        <div class="hero-meta-item">
+          <span class="hero-meta-label">Codename</span>
+          <span class="hero-meta-value">Project Singularity</span>
+        </div>
+        <div class="hero-meta-item">
+          <span class="hero-meta-label">Competitor Target</span>
+          <span class="hero-meta-value">OpenClaw (openclaw/openclaw)</span>
+        </div>
+        <div class="hero-meta-item">
+          <span class="hero-meta-label">Primary Language</span>
+          <span class="hero-meta-value">TypeScript + Rust</span>
+        </div>
+        <div class="hero-meta-item">
+          <span class="hero-meta-label">Target Latency</span>
+          <span class="hero-meta-value">&lt; 40ms Gateway</span>
+        </div>
+        <div class="hero-meta-item">
+          <span class="hero-meta-label">Status</span>
+          <span class="hero-meta-value">Pre-Architecture</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- ═══════════════ 01. VISION ═══════════════ -->
+    <section class="section" id="vision">
+      <div class="section-label">
+        <span class="section-number">01</span>
+        <span class="section-tag">Vision & Mission</span>
+        <div class="section-line"></div>
+      </div>
+
+      <h2>Build the <em>operating system</em><br>for the agentic era.</h2>
+
+      <p class="lead">OpenClaw proved the market. It showed the world that a personal AI agent, running locally,
+        accessible through any messaging app, is something millions of people want. UltraGravity is what OpenClaw would
+        have been if it were designed by a team who obsessed over performance, security, and developer ergonomics from
+        day one.</p>
+
+      <p>UltraGravity is not a "chatbot framework." It is a <strong>high-performance agentic runtime</strong> — a single
+        binary (or Docker image) that manages sessions, memory, tool execution, channel normalization, multi-agent
+        orchestration, and security policy enforcement, all in a way that is orders of magnitude faster and safer than
+        any existing solution.</p>
+
+      <div class="callout">
+        <div class="callout-title">Core Thesis</div>
+        <p>The bottleneck in personal AI agents is not the LLM. It is the infrastructure around the LLM — the queue
+          management, the context assembly, the tool sandboxing, the memory retrieval, and the security enforcement.
+          UltraGravity solves all of these at the systems level, in Rust, so the developer never has to think about
+          them.</p>
+      </div>
+
+      <h3>Design Principles</h3>
+
+      <div class="cards">
+        <div class="card">
+          <div class="card-icon">⚡</div>
+          <h4>Speed First</h4>
+          <p>Every architectural decision is evaluated against its latency impact. The gateway core is written in Rust.
+            The hot path from message receipt to LLM invocation must be under 40ms, excluding network round-trips.</p>
+        </div>
+        <div class="card">
+          <div class="card-icon amber">🔒</div>
+          <h4>Secure by Default</h4>
+          <p>Security is not a layer on top — it is the foundation. Every tool execution runs in an isolated process
+            with seccomp/Landlock. Prompt injection is structurally impossible at the message routing layer.</p>
+        </div>
+        <div class="card">
+          <div class="card-icon violet">🧩</div>
+          <h4>Zero-Config Extensibility</h4>
+          <p>New channels, tools, memory backends, and LLM providers drop in as self-contained packages with no
+            modifications to core code. Discovery is automatic. Skills hot-reload in under 200ms.</p>
+        </div>
+        <div class="card">
+          <div class="card-icon crimson">🌐</div>
+          <h4>Multi-Tenant Ready</h4>
+          <p>Unlike OpenClaw's personal-first design, UltraGravity is built from the ground up for team and enterprise
+            deployment with per-workspace quotas, audit logs, and role-based access control.</p>
+        </div>
+        <div class="card">
+          <div class="card-icon">📡</div>
+          <h4>LLM Agnostic</h4>
+          <p>First-class support for Claude, GPT-4o, Gemini, Mistral, Llama, and any OpenAI-compatible endpoint.
+            Automatic fallback routing and cost-aware model selection built in.</p>
+        </div>
+        <div class="card">
+          <div class="card-icon amber">🧠</div>
+          <h4>Intelligent Memory</h4>
+          <p>Hybrid memory architecture: vector similarity search, BM25 keyword search, and a novel temporal decay model
+            that surfaces the most contextually relevant memories — not just the most recent.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════════ 02. VS OPENCLAW ═══════════════ -->
+    <section class="section" id="vs-openclaw">
+      <div class="section-label">
+        <span class="section-number">02</span>
+        <span class="section-tag">Competitive Analysis</span>
+        <div class="section-line"></div>
+      </div>
+
+      <h2><em>UltraGravity</em> vs OpenClaw</h2>
+
+      <p class="lead">A feature-by-feature and architecture-by-architecture comparison. The goal is not to imitate — it
+        is to fundamentally outclass.</p>
+
+      <table class="compare-table">
+        <thead>
+          <tr>
+            <th>Dimension</th>
+            <th>OpenClaw</th>
+            <th>UltraGravity</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Core Runtime Language</td>
+            <td>TypeScript / Node.js</td>
+            <td>Rust (core) + TypeScript (extensions SDK) <span class="badge badge-plasma">10–50× faster hot path</span>
+            </td>
+          </tr>
+          <tr>
+            <td>Agent Loop</td>
+            <td>Delegated to external Pi framework</td>
+            <td>Native GravityCore — fully owned, zero external deps <span class="badge badge-plasma">Owned</span></td>
+          </tr>
+          <tr>
+            <td>Concurrency Model</td>
+            <td>Serial Lane Queue per session (JS event loop)</td>
+            <td>WarpQueue: async-first, Tokio-based with parallel subtask lanes and cooperative cancellation <span
+                class="badge badge-plasma">Parallel-by-design</span></td>
+          </tr>
+          <tr>
+            <td>Session Isolation</td>
+            <td>Logical (JS Map per session key)</td>
+            <td>Physical: each session runs in an isolated async task with its own memory arena <span
+                class="badge badge-amber">Stronger</span></td>
+          </tr>
+          <tr>
+            <td>Memory System</td>
+            <td>SQLite + FTS5 + configurable vector embeddings</td>
+            <td>GravityMem: WAL-optimized SQLite + hnswlib ANN + BM25 + temporal decay scoring + graph memory <span
+                class="badge badge-plasma">Superior recall</span></td>
+          </tr>
+          <tr>
+            <td>Tool Execution Security</td>
+            <td>Process-level (Node child_process)</td>
+            <td>Landlock + seccomp-bpf sandboxed micro-processes with capability bitmask per session trust level <span
+                class="badge badge-crimson">Hardened</span></td>
+          </tr>
+          <tr>
+            <td>Channels (built-in)</td>
+            <td>8 (WhatsApp, Telegram, Discord, Slack, iMessage, Signal, Teams, more via ext)</td>
+            <td>12 built-in + standardized plugin SDK for unlimited extensions <span
+                class="badge badge-plasma">More</span></td>
+          </tr>
+          <tr>
+            <td>Multi-Agent</td>
+            <td>Basic routing via session tools</td>
+            <td>Full agent mesh with capability negotiation, result streaming, and distributed execution <span
+                class="badge badge-violet">Native mesh</span></td>
+          </tr>
+          <tr>
+            <td>Skills System</td>
+            <td>SKILL.md files, hot-reload on file change</td>
+            <td>Typed skill manifests + compiled skill graph + semantic pre-selection + auto-generated skill scaffolding
+              <span class="badge badge-plasma">Smarter</span>
+            </td>
+          </tr>
+          <tr>
+            <td>Context Assembly Speed</td>
+            <td>~80–200ms (JS, sequential retrieval)</td>
+            <td>&lt;20ms (Rust, parallel retrieval, pre-built context windows) <span class="badge badge-plasma">10×
+                faster</span></td>
+          </tr>
+          <tr>
+            <td>Prompt Injection Defense</td>
+            <td>Partial (heuristic system prompt checks)</td>
+            <td>Structural: user-controlled and tool-sourced content never enters the trusted instruction stream <span
+                class="badge badge-crimson">Architectural</span></td>
+          </tr>
+          <tr>
+            <td>Multi-Tenant / Teams</td>
+            <td>Single-user personal assistant focus</td>
+            <td>First-class workspace model with per-user quotas, RBAC, and audit trail <span
+                class="badge badge-amber">Enterprise-ready</span></td>
+          </tr>
+          <tr>
+            <td>Deployment</td>
+            <td>npm global install, macOS app, Docker</td>
+            <td>Single binary, Docker, k8s Helm chart, Fly.io one-click, Railway template <span
+                class="badge badge-plasma">More options</span></td>
+          </tr>
+          <tr>
+            <td>Observability</td>
+            <td>Basic logs</td>
+            <td>OpenTelemetry native: traces, metrics, structured logs, Grafana dashboard template <span
+                class="badge badge-violet">Full observability</span></td>
+          </tr>
+          <tr>
+            <td>Web UI</td>
+            <td>Basic control panel</td>
+            <td>Real-time session monitor, skill editor, memory browser, agent graph visualizer, live token cost tracker
+              <span class="badge badge-plasma">Rich</span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- ═══════════════ 03. PERFORMANCE SPECS ═══════════════ -->
+    <section class="section" id="specs">
+      <div class="section-label">
+        <span class="section-number">03</span>
+        <span class="section-tag">Performance Targets</span>
+        <div class="section-line"></div>
+      </div>
+
+      <h2>Non-negotiable <em>performance</em> targets.</h2>
+
+      <div class="spec-grid">
+        <div class="spec-item">
+          <span class="spec-label">Gateway Latency (p99)</span>
+          <span class="spec-value">&lt;40ms</span>
+          <span class="spec-desc">Message receipt to LLM invocation, excluding network</span>
+        </div>
+        <div class="spec-item">
+          <span class="spec-label">Context Assembly</span>
+          <span class="spec-value">&lt;20ms</span>
+          <span class="spec-desc">Parallel memory retrieval + prompt construction</span>
+        </div>
+        <div class="spec-item">
+          <span class="spec-label">Skill Discovery</span>
+          <span class="spec-value">&lt;5ms</span>
+          <span class="spec-desc">Semantic skill pre-selection from compiled graph</span>
+        </div>
+        <div class="spec-item">
+          <span class="spec-label">Memory Write (vector)</span>
+          <span class="spec-value">&lt;8ms</span>
+          <span class="spec-desc">Embedding + index insert + WAL commit</span>
+        </div>
+        <div class="spec-item">
+          <span class="spec-label">Memory Read (hybrid)</span>
+          <span class="spec-value">&lt;12ms</span>
+          <span class="spec-desc">ANN vector search + BM25 + temporal re-rank, fused</span>
+        </div>
+        <div class="spec-item">
+          <span class="spec-label">Session Cold Start</span>
+          <span class="spec-value">&lt;80ms</span>
+          <span class="spec-desc">New session initialization including memory index hydration</span>
+        </div>
+        <div class="spec-item">
+          <span class="spec-label">Skill Hot-Reload</span>
+          <span class="spec-value">&lt;200ms</span>
+          <span class="spec-desc">File change → compiled skill graph update → active in runtime</span>
+        </div>
+        <div class="spec-item">
+          <span class="spec-label">Concurrent Sessions</span>
+          <span class="spec-value">10,000+</span>
+          <span class="spec-desc">On a single 4-core machine with 8GB RAM (Tokio async)</span>
+        </div>
+      </div>
+
+      <h3>Performance vs OpenClaw (Benchmarks by Design)</h3>
+
+      <div class="perf-compare">
+        <div class="perf-row">
+          <div class="perf-label">Gateway Routing</div>
+          <div class="perf-bars">
+            <div class="perf-bar-wrap">
+              <div class="perf-bar-label">OpenClaw</div>
+              <div class="perf-bar-track">
+                <div class="perf-bar-fill openclaw" style="width:72%"></div>
+              </div>
+            </div>
+            <div class="perf-bar-wrap">
+              <div class="perf-bar-label">UltraGravity</div>
+              <div class="perf-bar-track">
+                <div class="perf-bar-fill" style="width:12%"></div>
+              </div>
+            </div>
+          </div>
+          <div class="perf-val">6× faster</div>
+        </div>
+        <div class="perf-row">
+          <div class="perf-label">Context Assembly</div>
+          <div class="perf-bars">
+            <div class="perf-bar-wrap">
+              <div class="perf-bar-label">OpenClaw</div>
+              <div class="perf-bar-track">
+                <div class="perf-bar-fill openclaw" style="width:80%"></div>
+              </div>
+            </div>
+            <div class="perf-bar-wrap">
+              <div class="perf-bar-label">UltraGravity</div>
+              <div class="perf-bar-track">
+                <div class="perf-bar-fill" style="width:8%"></div>
+              </div>
+            </div>
+          </div>
+          <div class="perf-val">10× faster</div>
+        </div>
+        <div class="perf-row">
+          <div class="perf-label">Memory Recall</div>
+          <div class="perf-bars">
+            <div class="perf-bar-wrap">
+              <div class="perf-bar-label">OpenClaw</div>
+              <div class="perf-bar-track">
+                <div class="perf-bar-fill openclaw" style="width:65%"></div>
+              </div>
+            </div>
+            <div class="perf-bar-wrap">
+              <div class="perf-bar-label">UltraGravity</div>
+              <div class="perf-bar-track">
+                <div class="perf-bar-fill" style="width:10%"></div>
+              </div>
+            </div>
+          </div>
+          <div class="perf-val">6× faster</div>
+        </div>
+        <div class="perf-row">
+          <div class="perf-label">Concurrent Sessions</div>
+          <div class="perf-bars">
+            <div class="perf-bar-wrap">
+              <div class="perf-bar-label">OpenClaw</div>
+              <div class="perf-bar-track">
+                <div class="perf-bar-fill openclaw" style="width:20%"></div>
+              </div>
+            </div>
+            <div class="perf-bar-wrap">
+              <div class="perf-bar-label">UltraGravity</div>
+              <div class="perf-bar-track">
+                <div class="perf-bar-fill" style="width:100%"></div>
+              </div>
+            </div>
+          </div>
+          <div class="perf-val">50× more</div>
+        </div>
+        <div class="perf-row">
+          <div class="perf-label">Binary Size / Cold Start</div>
+          <div class="perf-bars">
+            <div class="perf-bar-wrap">
+              <div class="perf-bar-label">OpenClaw</div>
+              <div class="perf-bar-track">
+                <div class="perf-bar-fill openclaw" style="width:90%"></div>
+              </div>
+            </div>
+            <div class="perf-bar-wrap">
+              <div class="perf-bar-label">UltraGravity</div>
+              <div class="perf-bar-track">
+                <div class="perf-bar-fill" style="width:15%"></div>
+              </div>
+            </div>
+          </div>
+          <div class="perf-val">6× smaller</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════════ 04. ARCHITECTURE OVERVIEW ═══════════════ -->
+    <section class="section" id="arch-overview">
+      <div class="section-label">
+        <span class="section-number">04</span>
+        <span class="section-tag">System Architecture</span>
+        <div class="section-line"></div>
+      </div>
+
+      <h2>The <em>6-Layer</em> Gravity Architecture</h2>
+
+      <p class="lead">Where OpenClaw uses 4 layers (Gateway, Execution, Integration, Intelligence), UltraGravity uses 6
+        specialized layers with a hard performance contract at every boundary.</p>
+
+      <div class="arch-diagram">
+        <div class="arch-layers">
+          <div class="arch-layer">
+            <div class="arch-layer-name">
+              <div class="arch-layer-num">L1</div>
+              <div class="arch-layer-title">Event Surface</div>
+            </div>
+            <div class="arch-layer-body">
+              <span class="arch-chip plasma">WhatsApp</span>
+              <span class="arch-chip plasma">Telegram</span>
+              <span class="arch-chip plasma">Discord</span>
+              <span class="arch-chip plasma">Slack</span>
+              <span class="arch-chip plasma">iMessage</span>
+              <span class="arch-chip plasma">Signal</span>
+              <span class="arch-chip plasma">Teams</span>
+              <span class="arch-chip plasma">Email</span>
+              <span class="arch-chip plasma">SMS</span>
+              <span class="arch-chip plasma">Web UI</span>
+              <span class="arch-chip plasma">CLI</span>
+              <span class="arch-chip plasma">REST / WS API</span>
+              <span class="arch-chip">+ Plugin Channels</span>
+            </div>
+          </div>
+          <div class="arch-layer">
+            <div class="arch-layer-name">
+              <div class="arch-layer-num">L2</div>
+              <div class="arch-layer-title">GravityGate</div>
+            </div>
+            <div class="arch-layer-body">
+              <span class="arch-chip amber">Tokio Async Runtime</span>
+              <span class="arch-chip amber">TLS Termination</span>
+              <span class="arch-chip amber">Auth & Rate Limiting</span>
+              <span class="arch-chip amber">Access Control Lists</span>
+              <span class="arch-chip amber">Request Deduplication</span>
+              <span class="arch-chip">WS Multiplexer</span>
+              <span class="arch-chip">HTTP/2 Server</span>
+            </div>
+          </div>
+          <div class="arch-layer">
+            <div class="arch-layer-name">
+              <div class="arch-layer-num">L3</div>
+              <div class="arch-layer-title">WarpQueue</div>
+            </div>
+            <div class="arch-layer-body">
+              <span class="arch-chip violet">Per-Session Priority Queue</span>
+              <span class="arch-chip violet">Cooperative Cancellation</span>
+              <span class="arch-chip violet">Parallel Subtask Lanes</span>
+              <span class="arch-chip violet">Backpressure Control</span>
+              <span class="arch-chip violet">Cron Scheduler</span>
+              <span class="arch-chip violet">Webhook Dispatcher</span>
+            </div>
+          </div>
+          <div class="arch-layer">
+            <div class="arch-layer-name">
+              <div class="arch-layer-num">L4</div>
+              <div class="arch-layer-title">GravityCore</div>
+            </div>
+            <div class="arch-layer-body">
+              <span class="arch-chip plasma">Context Assembler</span>
+              <span class="arch-chip plasma">Skill Selector (semantic)</span>
+              <span class="arch-chip plasma">LLM Provider Router</span>
+              <span class="arch-chip plasma">Tool Dispatcher</span>
+              <span class="arch-chip plasma">Response Streaming</span>
+              <span class="arch-chip plasma">Turn Manager</span>
+            </div>
+          </div>
+          <div class="arch-layer">
+            <div class="arch-layer-name">
+              <div class="arch-layer-num">L5</div>
+              <div class="arch-layer-title">GravityMem</div>
+            </div>
+            <div class="arch-layer-body">
+              <span class="arch-chip amber">SQLite WAL (session state)</span>
+              <span class="arch-chip amber">HNSW Vector Index</span>
+              <span class="arch-chip amber">BM25 Full-Text Search</span>
+              <span class="arch-chip amber">Temporal Decay Model</span>
+              <span class="arch-chip amber">Graph Memory (entity links)</span>
+              <span class="arch-chip">Session Compaction</span>
+            </div>
+          </div>
+          <div class="arch-layer">
+            <div class="arch-layer-name">
+              <div class="arch-layer-num">L6</div>
+              <div class="arch-layer-title">GravityShield</div>
+            </div>
+            <div class="arch-layer-body">
+              <span class="arch-chip crimson">Landlock Sandboxing</span>
+              <span class="arch-chip crimson">seccomp-bpf Filters</span>
+              <span class="arch-chip crimson">Capability Bitmasks</span>
+              <span class="arch-chip crimson">Prompt Injection Firewall</span>
+              <span class="arch-chip crimson">Content Policy Engine</span>
+              <span class="arch-chip crimson">Audit Log Stream</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="callout amber">
+        <div class="callout-title">Architectural Difference from OpenClaw</div>
+        <p>OpenClaw delegates its agent loop to the external <code>pi-agent</code> framework, meaning it doesn't own the
+          core execution. UltraGravity owns every layer — the gateway, the queue, the agent loop, the memory, and the
+          security layer — all in a single coherent binary with no external runtime dependencies.</p>
+      </div>
+    </section>
+
+    <!-- ═══════════════ 05. GRAVITYCORE ENGINE ═══════════════ -->
+    <section class="section" id="gravity-core">
+      <div class="section-label">
+        <span class="section-number">05</span>
+        <span class="section-tag">Core Engine</span>
+        <div class="section-line"></div>
+      </div>
+
+      <h2>GravityCore — <em>The Agent Loop</em></h2>
+
+      <p class="lead">GravityCore is UltraGravity's native agent execution engine, written entirely in Rust. It owns the
+        full turn lifecycle: context assembly, model invocation, tool execution, streaming response delivery, and state
+        persistence.</p>
+
+      <h3>The Turn Lifecycle</h3>
+
+      <div class="flow">
+        <div class="flow-step">
+          <div class="flow-step-inner">
+            <div class="flow-num">01</div>
+            <div class="flow-name">Session Resolve</div>
+            <div class="flow-desc">Workspace:Channel:User key computed. Session loaded from GravityMem or initialized
+              cold.</div>
+          </div>
+        </div>
+        <div class="flow-step active">
+          <div class="flow-step-inner">
+            <div class="flow-num">02</div>
+            <div class="flow-name">Parallel Retrieval</div>
+            <div class="flow-desc">Vector search + BM25 + history fetch run in parallel via tokio::join! — not
+              sequential.</div>
+          </div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-step-inner">
+            <div class="flow-num">03</div>
+            <div class="flow-name">Skill Injection</div>
+            <div class="flow-desc">Semantic pre-select identifies relevant skills. Full skill content injected into
+              context only when needed.</div>
+          </div>
+        </div>
+        <div class="flow-step active">
+          <div class="flow-step-inner">
+            <div class="flow-num">04</div>
+            <div class="flow-name">Model Invoke</div>
+            <div class="flow-desc">LLM Router selects optimal provider. Streaming SSE established. Cost tracked per
+              token.</div>
+          </div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-step-inner">
+            <div class="flow-num">05</div>
+            <div class="flow-name">Tool Execute</div>
+            <div class="flow-desc">Tool calls dispatched to sandboxed processes. Results streamed back as tool result
+              blocks.</div>
+          </div>
+        </div>
+        <div class="flow-step active">
+          <div class="flow-step-inner">
+            <div class="flow-num">06</div>
+            <div class="flow-name">Response Deliver</div>
+            <div class="flow-desc">Formatted and chunked per channel constraints. Streamed token-by-token where platform
+              allows.</div>
+          </div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-step-inner">
+            <div class="flow-num">07</div>
+            <div class="flow-name">State Persist</div>
+            <div class="flow-desc">Turn written to session WAL. Memory extraction runs asynchronously, never blocking
+              response.</div>
+          </div>
+        </div>
+      </div>
+
+      <h3>LLM Provider Router</h3>
+      <p>Unlike OpenClaw which defaults to Claude and has manual provider switching, GravityCore's LLM Router implements
+        automatic intelligent routing based on multiple signals:</p>
+
+      <ul>
+        <li><strong>Task type classification</strong> — code tasks route to models with strong coding benchmarks;
+          reasoning tasks to models with strong chain-of-thought.</li>
+        <li><strong>Cost optimization</strong> — user-configurable budget thresholds automatically fall back to cheaper
+          models for low-complexity turns.</li>
+        <li><strong>Latency optimization</strong> — if a provider's P50 response time has spiked in the last 60 seconds,
+          the router shifts traffic to the backup provider.</li>
+        <li><strong>Failover</strong> — automatic retry with exponential backoff, then provider failover on 5xx errors.
+        </li>
+      </ul>
+
+      <div class="code-block">
+        <div class="code-block-header">
+          <div class="code-block-title">GravityCore — LLM Router (Conceptual)</div>
+          <div class="code-block-lang">Rust</div>
+        </div>
+        <pre><span class="c">// LLM Router — selects optimal provider per turn</span>
+<span class="k">pub</span> <span class="k">struct</span> <span class="t">LLMRouter</span> {
+    providers: <span class="t">Vec</span>&lt;<span class="t">Box</span>&lt;<span class="k">dyn</span> <span class="t">LLMProvider</span>&gt;&gt;,
+    health: <span class="t">Arc</span>&lt;<span class="t">RwLock</span>&lt;<span class="t">HealthMap</span>&gt;&gt;,
+    policy: <span class="t">RouterPolicy</span>,
+}
+
+<span class="k">impl</span> <span class="t">LLMRouter</span> {
+    <span class="k">pub</span> <span class="k">async</span> <span class="k">fn</span> <span class="n">route</span>(&amp;<span class="k">self</span>, ctx: &amp;<span class="t">TurnContext</span>) -&gt; <span class="t">Result</span>&lt;<span class="t">LLMStream</span>&gt; {
+        <span class="k">let</span> candidate = <span class="k">self</span>.policy.select(
+            &amp;<span class="k">self</span>.providers,
+            &amp;<span class="k">self</span>.health.read().<span class="k">await</span>,
+            &amp;ctx.task_class,   <span class="c">// code | reasoning | creative | simple</span>
+            ctx.budget_remaining,
+            ctx.latency_target,
+        );
+
+        <span class="k">match</span> candidate.invoke_stream(ctx).<span class="k">await</span> {
+            <span class="t">Ok</span>(stream) =&gt; <span class="t">Ok</span>(stream),
+            <span class="t">Err</span>(e) <span class="k">if</span> e.is_retriable() =&gt; {
+                <span class="c">// Mark provider unhealthy, retry with fallback</span>
+                <span class="k">self</span>.health.write().<span class="k">await</span>.mark_degraded(candidate.id);
+                <span class="k">self</span>.route_fallback(ctx).<span class="k">await</span>
+            }
+            <span class="t">Err</span>(e) =&gt; <span class="t">Err</span>(e),
+        }
+    }
+}</pre>
+      </div>
+
+      <h3>Context Assembly — Parallel by Design</h3>
+      <p>OpenClaw assembles context sequentially: load history, then search memory, then select skills. Each step blocks
+        on the previous. UltraGravity fires all three in parallel using Tokio's <code>join!</code> macro and fuses the
+        results:</p>
+
+      <div class="code-block">
+        <div class="code-block-header">
+          <div class="code-block-title">Parallel Context Assembly</div>
+          <div class="code-block-lang">Rust</div>
+        </div>
+        <pre><span class="k">pub async fn</span> <span class="n">assemble_context</span>(
+    session: &amp;<span class="t">Session</span>,
+    query: &amp;<span class="t">str</span>,
+    mem: &amp;<span class="t">GravityMem</span>,
+    skills: &amp;<span class="t">SkillRegistry</span>,
+) -&gt; <span class="t">Context</span> {
+
+    <span class="c">// All three fire simultaneously — no sequential blocking</span>
+    <span class="k">let</span> (history, memories, selected_skills) = tokio::join!(
+        session.recent_history(<span class="v">32</span>),
+        mem.hybrid_recall(query, <span class="v">8</span>),    <span class="c">// vector + BM25 fused</span>
+        skills.pre_select(query),         <span class="c">// semantic skill match</span>
+    );
+
+    <span class="t">Context</span>::build()
+        .system(session.workspace.system_prompt())
+        .memories(memories)
+        .skills(selected_skills)
+        .history(history)
+        .user(query)
+        .seal()  <span class="c">// immutable after build — security property</span>
+}</pre>
+      </div>
+    </section>
+
+    <!-- ═══════════════ 06. WARPQUEUE ═══════════════ -->
+    <section class="section" id="warp-queue">
+      <div class="section-label">
+        <span class="section-number">06</span>
+        <span class="section-tag">Concurrency Engine</span>
+        <div class="section-line"></div>
+      </div>
+
+      <h2>WarpQueue — <em>Beyond the Lane Queue</em></h2>
+
+      <p class="lead">OpenClaw's Lane Queue is clever: serial execution per session eliminates race conditions. But it's
+        built on JavaScript's single-threaded event loop, which means a CPU-intensive tool execution can still stall
+        other sessions. WarpQueue is the Rust-native evolution of this idea.</p>
+
+      <h3>How WarpQueue Improves on the Lane Queue</h3>
+
+      <div class="cards">
+        <div class="card">
+          <div class="card-icon">🏎️</div>
+          <h4>Tokio Async Core</h4>
+          <p>Built on Tokio, the production-grade Rust async runtime. A blocked tool task doesn't block the event loop —
+            it yields. Thousands of sessions can be in flight simultaneously on a single machine.</p>
+        </div>
+        <div class="card">
+          <div class="card-icon amber">📊</div>
+          <h4>Priority Levels</h4>
+          <p>Each message is assigned a priority: <code>URGENT</code> (interrupts), <code>NORMAL</code>
+            (conversational), <code>BACKGROUND</code> (cron, memory extraction). URGENT messages can preempt BACKGROUND
+            tasks cooperatively.</p>
+        </div>
+        <div class="card">
+          <div class="card-icon violet">⚡</div>
+          <h4>Subtask Lanes</h4>
+          <p>Within a single turn, parallel subtasks (e.g., a web search + a file read happening simultaneously) execute
+            in dedicated lanes without blocking the main conversation queue.</p>
+        </div>
+        <div class="card">
+          <div class="card-icon crimson">🚫</div>
+          <h4>Cooperative Cancellation</h4>
+          <p>Every task receives a <code>CancellationToken</code>. When the user sends "stop" or a timeout fires, the
+            cancellation signal propagates atomically through all in-flight tool calls and sub-agents.</p>
+        </div>
+      </div>
+
+      <h3>Queue Architecture</h3>
+
+      <div class="code-block">
+        <div class="code-block-header">
+          <div class="code-block-title">WarpQueue — Core Data Structure</div>
+          <div class="code-block-lang">Rust</div>
+        </div>
+        <pre><span class="k">pub struct</span> <span class="t">WarpQueue</span> {
+    <span class="c">// Per-session queue — keyed by workspace:channel:user</span>
+    sessions: <span class="t">DashMap</span>&lt;<span class="t">SessionKey</span>, <span class="t">SessionQueue</span>&gt;,
+    semaphore: <span class="t">Arc</span>&lt;<span class="t">Semaphore</span>&gt;,  <span class="c">// global concurrency cap</span>
+}
+
+<span class="k">pub struct</span> <span class="t">SessionQueue</span> {
+    primary: <span class="t">BinaryHeap</span>&lt;<span class="t">PriorityTask</span>&gt;,   <span class="c">// priority-ordered turns</span>
+    background: <span class="t">VecDeque</span>&lt;<span class="t">Task</span>&gt;,          <span class="c">// cron, webhooks, memory ops</span>
+    active: <span class="t">Option</span>&lt;<span class="t">TaskHandle</span>&gt;,          <span class="c">// currently running turn</span>
+    cancel: <span class="t">CancellationToken</span>,
+}
+
+<span class="k">impl</span> <span class="t">WarpQueue</span> {
+    <span class="k">pub async fn</span> <span class="n">enqueue</span>(
+        &amp;<span class="k">self</span>,
+        key: <span class="t">SessionKey</span>,
+        task: <span class="t">Task</span>,
+        priority: <span class="t">Priority</span>,
+    ) {
+        <span class="k">let</span> <span class="k">mut</span> q = <span class="k">self</span>.sessions.entry(key).or_default();
+        <span class="k">if</span> priority == <span class="t">Priority</span>::Urgent {
+            <span class="c">// Cooperatively cancel current background task if running</span>
+            <span class="k">if let</span> <span class="t">Some</span>(active) = &amp;q.active {
+                <span class="k">if</span> active.priority &lt; <span class="t">Priority</span>::Normal {
+                    q.cancel.cancel();
+                }
+            }
+        }
+        q.primary.push(<span class="t">PriorityTask</span> { task, priority });
+        <span class="k">self</span>.try_run_next(&amp;<span class="k">mut</span> q).<span class="k">await</span>;
+    }
+}</pre>
+      </div>
+
+      <div class="callout violet">
+        <div class="callout-title">Why This Matters</div>
+        <p>In OpenClaw, if a bash tool call takes 5 seconds, that session is blocked for 5 seconds. In UltraGravity, the
+          async runtime yields control back immediately — other sessions, background memory operations, and health
+          checks all continue uninterrupted. At 10,000 concurrent sessions, this difference is the line between a
+          product that works and one that collapses under load.</p>
+      </div>
+    </section>
+
+    <!-- ═══════════════ 07. CHANNELS ═══════════════ -->
+    <section class="section" id="channels">
+      <div class="section-label">
+        <span class="section-number">07</span>
+        <span class="section-tag">Integration Layer</span>
+        <div class="section-line"></div>
+      </div>
+
+      <h2>Channel Adapters — <em>Universal Message Fabric</em></h2>
+
+      <p class="lead">UltraGravity ships 12 built-in channel adapters. Each is a self-contained Rust module implementing
+        the <code>ChannelAdapter</code> trait. The normalized message type is the universal currency — no
+        adapter-specific logic leaks past L1.</p>
+
+      <h3>Built-in Channels</h3>
+
+      <div class="cards">
+        <div class="card">
+          <div class="card-icon">💬</div>
+          <h4>WhatsApp</h4>
+          <p>Baileys-compatible WA Web protocol. QR pairing, multi-device, media normalized.</p>
+        </div>
+        <div class="card">
+          <div class="card-icon amber">✈️</div>
+          <h4>Telegram</h4>
+          <p>grammY-compatible Bot API. Inline keyboards, file delivery, group mention detection.</p>
+        </div>
+        <div class="card">
+          <div class="card-icon violet">🎮</div>
+          <h4>Discord</h4>
+          <p>Slash commands, thread isolation, per-channel skill overrides.</p>
+        </div>
+        <div class="card">
+          <div class="card-icon">💼</div>
+          <h4>Slack</h4>
+          <p>Socket Mode, Block Kit response formatting, reaction handling, DM + channel modes.</p>
+        </div>
+        <div class="card">
+          <div class="card-icon amber">💬</div>
+          <h4>iMessage</h4>
+          <p>macOS-native bridge. AppleScript automation with read-receipt awareness.</p>
+        </div>
+        <div class="card">
+          <div class="card-icon crimson">🔒</div>
+          <h4>Signal</h4>
+          <p>signal-cli integration. Zero-knowledge transport, sealed sender where available.</p>
+        </div>
+        <div class="card">
+          <div class="card-icon violet">🏢</div>
+          <h4>Microsoft Teams</h4>
+          <p>Azure Bot Framework integration. Adaptive Cards, meeting transcript hooks.</p>
+        </div>
+        <div class="card">
+          <div class="card-icon">📧</div>
+          <h4>Email (IMAP/SMTP)</h4>
+          <p>New channel vs OpenClaw. Trigger on inbound email, reply in-thread with full HTML formatting.</p>
+        </div>
+        <div class="card">
+          <div class="card-icon amber">📱</div>
+          <h4>SMS (Twilio)</h4>
+          <p>New channel. Twilio webhook integration. Automatic chunking for 160-char limits.</p>
+        </div>
+        <div class="card">
+          <div class="card-icon plasma">🌐</div>
+          <h4>Web Widget</h4>
+          <p>Embeddable JS widget. Streaming tokens over SSE. Configurable per-domain allow list.</p>
+        </div>
+        <div class="card">
+          <div class="card-icon violet">🐦</div>
+          <h4>Matrix</h4>
+          <p>matrix-bot-sdk integration. End-to-end encryption support via Rust Olm bindings.</p>
+        </div>
+        <div class="card">
+          <div class="card-icon">💬</div>
+          <h4>LINE / Feishu</h4>
+          <p>Asian market priority channels, shipped built-in, not as extensions.</p>
+        </div>
+      </div>
+
+      <h3>The Normalized Message Type</h3>
+
+      <div class="code-block">
+        <div class="code-block-header">
+          <div class="code-block-title">Universal Message Schema</div>
+          <div class="code-block-lang">Rust</div>
+        </div>
+        <pre><span class="k">pub struct</span> <span class="t">InboundMessage</span> {
+    <span class="c">// Routing</span>
+    <span class="k">pub</span> session_key: <span class="t">SessionKey</span>,     <span class="c">// workspace:channel:user</span>
+    <span class="k">pub</span> channel: <span class="t">ChannelId</span>,
+    <span class="k">pub</span> message_id: <span class="t">Uuid</span>,
+    <span class="k">pub</span> timestamp: <span class="t">DateTime</span>&lt;<span class="t">Utc</span>&gt;,
+
+    <span class="c">// Content (all optional, at least one required)</span>
+    <span class="k">pub</span> text: <span class="t">Option</span>&lt;<span class="t">String</span>&gt;,
+    <span class="k">pub</span> media: <span class="t">Vec</span>&lt;<span class="t">MediaAttachment</span>&gt;,
+    <span class="k">pub</span> reply_to: <span class="t">Option</span>&lt;<span class="t">Uuid</span>&gt;,
+
+    <span class="c">// Access control hint from adapter</span>
+    <span class="k">pub</span> trust_level: <span class="t">TrustLevel</span>,    <span class="c">// Owner | Trusted | Paired | Guest</span>
+
+    <span class="c">// Platform-specific passthrough (never touches agent logic)</span>
+    <span class="k">pub</span> platform_meta: <span class="t">serde_json::Value</span>,
+}
+
+<span class="k">pub struct</span> <span class="t">MediaAttachment</span> {
+    <span class="k">pub</span> kind: <span class="t">MediaKind</span>,     <span class="c">// Image | Audio | Video | Document | Location</span>
+    <span class="k">pub</span> mime_type: <span class="t">String</span>,
+    <span class="k">pub</span> data: <span class="t">MediaData</span>,     <span class="c">// Inline(Vec&lt;u8&gt;) | Url(String)</span>
+    <span class="k">pub</span> transcript: <span class="t">Option</span>&lt;<span class="t">String</span>&gt;,  <span class="c">// auto-transcribed audio</span>
+}</pre>
+      </div>
+
+      <p>Notice that <code>trust_level</code> is set by the adapter and immutable past L1. The GravityShield layer reads
+        this to determine tool capability grants — it never re-derives trust from user-supplied content. This
+        structurally prevents trust escalation via crafted messages.</p>
+    </section>
+
+    <!-- ═══════════════ 08. INTELLIGENCE LAYER ═══════════════ -->
+    <section class="section" id="intelligence">
+      <div class="section-label">
+        <span class="section-number">08</span>
+        <span class="section-tag">Intelligence Layer</span>
+        <div class="section-line"></div>
+      </div>
+
+      <h2>The <em>Intelligence</em> Layer</h2>
+
+      <p class="lead">The intelligence layer is where UltraGravity earns its name. It combines a native agent loop, a
+        semantic skill engine, a multi-model router, and proactive heartbeat capabilities — all without delegating to
+        external frameworks.</p>
+
+      <h3>System Prompt Architecture</h3>
+      <p>The system prompt is never a single string. It is a <strong>layered, typed data structure</strong> assembled by
+        GravityCore at each turn, with strict content-source labeling. Each layer has a defined trust class, and the LLM
+        is instructed (at the structural level) about which layers are user-influenced vs. system-authoritative.</p>
+
+      <div class="arch-diagram" style="padding: 32px;">
+        <div
+          style="display:flex; flex-direction:column; gap:8px; font-family:'JetBrains Mono',monospace; font-size:12px;">
+          <div
+            style="background:rgba(0,245,212,0.05); border:1px solid rgba(0,245,212,0.2); padding:12px 16px; display:flex; justify-content:space-between; align-items:center;">
+            <span style="color:var(--plasma)">SYSTEM LAYER 0: GravityCore Rules</span>
+            <span class="badge badge-plasma">IMMUTABLE</span>
+          </div>
+          <div
+            style="background:rgba(245,166,35,0.05); border:1px solid rgba(245,166,35,0.2); padding:12px 16px; display:flex; justify-content:space-between; align-items:center;">
+            <span style="color:var(--amber)">SYSTEM LAYER 1: Workspace Config (AGENT.md / SOUL.md)</span>
+            <span class="badge badge-amber">ADMIN-CONTROLLED</span>
+          </div>
+          <div
+            style="background:rgba(124,58,237,0.05); border:1px solid rgba(124,58,237,0.2); padding:12px 16px; display:flex; justify-content:space-between; align-items:center;">
+            <span style="color:#a78bfa">CONTEXT LAYER 2: Active Skills (injected, labelled)</span>
+            <span class="badge badge-violet">SKILL-SYSTEM</span>
+          </div>
+          <div
+            style="background:rgba(124,58,237,0.03); border:1px solid rgba(124,58,237,0.1); padding:12px 16px; display:flex; justify-content:space-between; align-items:center;">
+            <span style="color:#a78bfa">CONTEXT LAYER 3: Retrieved Memories (labelled as memories)</span>
+            <span class="badge badge-violet">MEMORY-SYSTEM</span>
+          </div>
+          <div
+            style="border:1px solid var(--border); padding:12px 16px; display:flex; justify-content:space-between; align-items:center; background:rgba(255,255,255,0.02);">
+            <span style="color:var(--text-dim)">HISTORY LAYER 4: Conversation history (turn-by-turn)</span>
+            <span class="badge badge-amber"
+              style="border-color:rgba(255,255,255,0.1); color:var(--text-muted); background:transparent">HISTORY</span>
+          </div>
+          <div
+            style="background:rgba(255,61,110,0.03); border:1px solid rgba(255,61,110,0.15); padding:12px 16px; display:flex; justify-content:space-between; align-items:center;">
+            <span style="color:var(--crimson)">USER LAYER 5: Current user message [UNTRUSTED-USER-INPUT]</span>
+            <span class="badge badge-crimson">USER-INPUT</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="callout crimson">
+        <div class="callout-title">Structural Prompt Injection Defense</div>
+        <p>The <code>[UNTRUSTED-USER-INPUT]</code> label is prepended to every user message and tool result at the
+          <em>structural</em> level before model invocation. The GravityCore rules (Layer 0) explicitly instruct the
+          model never to treat UNTRUSTED-USER-INPUT as instructions to change behavior. This is not a heuristic — it is
+          an architectural constraint on context assembly that applies to every single turn.
+        </p>
+      </div>
+
+      <h3>Heartbeat Daemon</h3>
+      <p>UltraGravity's heartbeat daemon is a proactive agent scheduler that runs independently of user messages. It
+        wakes on configurable schedules and evaluates whether to take autonomous actions:</p>
+      <ul>
+        <li><strong>Digest generation</strong> — Morning summaries of pending tasks, calendar events, unread items.</li>
+        <li><strong>Memory consolidation</strong> — Periodically compresses conversation history into durable memory
+          entries.</li>
+        <li><strong>Proactive alerts</strong> — If a monitored metric (price, news keyword, calendar event) crosses a
+          threshold, the agent messages the user autonomously.</li>
+        <li><strong>Cron-based skill execution</strong> — Skills can declare <code>schedule: "0 9 * * *"</code> in their
+          manifest to trigger automatically.</li>
+      </ul>
+    </section>
+
+    <!-- ═══════════════ 09. BACKEND INTERNALS ═══════════════ -->
+    <section class="section" id="backend">
+      <div class="section-label">
+        <span class="section-number">09</span>
+        <span class="section-tag">Backend Deep Dive</span>
+        <div class="section-line"></div>
+      </div>
+
+      <h2>Backend <em>Internals</em> — The Full Picture</h2>
+
+      <p class="lead">This section is the engineering deep-dive. Every critical subsystem, its data structures, its
+        performance characteristics, and its interaction with adjacent systems.</p>
+
+      <h3>Directory Structure</h3>
+
+      <div class="code-block">
+        <div class="code-block-header">
+          <div class="code-block-title">UltraGravity — Monorepo Layout</div>
+          <div class="code-block-lang">bash</div>
+        </div>
+        <pre>ultragravity/
+├── crates/
+│   ├── gravity-core/       <span class="c"># Agent loop, context assembly, LLM router</span>
+│   ├── gravity-gate/       <span class="c"># Tokio HTTP/WS server, auth, rate limiting</span>
+│   ├── gravity-queue/      <span class="c"># WarpQueue — async session concurrency</span>
+│   ├── gravity-mem/        <span class="c"># GravityMem — hybrid memory system</span>
+│   ├── gravity-shield/     <span class="c"># Security: sandboxing, PIE firewall, audit</span>
+│   ├── gravity-skills/     <span class="c"># Skill registry, semantic selector, compiler</span>
+│   ├── gravity-channels/   <span class="c"># All built-in channel adapters</span>
+│   ├── gravity-tools/      <span class="c"># Built-in tools: bash, browser, file, canvas</span>
+│   ├── gravity-multi/      <span class="c"># Multi-agent mesh coordination</span>
+│   └── gravity-obs/        <span class="c"># OpenTelemetry spans, metrics, log pipeline</span>
+├── packages/
+│   ├── web-ui/             <span class="c"># React control panel + session monitor</span>
+│   ├── cli/                <span class="c"># gravity CLI binary (Rust)</span>
+│   └── sdk/                <span class="c"># TypeScript plugin SDK (channels, tools, skills)</span>
+├── extensions/             <span class="c"># Community channel + tool plugins</span>
+├── skills/                 <span class="c"># Built-in skill library</span>
+├── deploy/
+│   ├── docker/             <span class="c"># Multi-stage Dockerfile</span>
+│   ├── helm/               <span class="c"># Kubernetes Helm chart</span>
+│   └── fly/                <span class="c"># fly.toml for Fly.io one-click</span>
+└── Cargo.toml              <span class="c"># Workspace root</span></pre>
+      </div>
+
+      <h3>GravityGate — The Network Layer</h3>
+      <p>GravityGate is the single network entry point for the entire runtime. It is built on <strong>axum</strong>
+        (Rust's fastest HTTP framework, built on Tokio/Hyper) and handles all inbound connections regardless of
+        protocol:</p>
+
+      <ul>
+        <li><strong>HTTP/2 REST API</strong> — OpenAI-compatible <code>/v1/chat/completions</code> endpoint for
+          third-party tool integration.</li>
+        <li><strong>WebSocket control channel</strong> — The Web UI and CLI maintain a persistent WS connection for
+          real-time session streaming and control commands.</li>
+        <li><strong>Webhook receiver</strong> — <code>/webhooks/:channel</code> receives events from Telegram, Slack,
+          Discord, Twilio, etc. HMAC signature verification happens before any payload is parsed.</li>
+        <li><strong>Server-Sent Events</strong> — Token streaming to web clients uses SSE rather than WebSockets for
+          simpler client-side handling and proxy compatibility.</li>
+      </ul>
+
+      <h4>Request Authentication Pipeline</h4>
+      <div class="code-block">
+        <div class="code-block-header">
+          <div class="code-block-title">GravityGate — Auth Middleware Chain</div>
+          <div class="code-block-lang">Rust (axum)</div>
+        </div>
+        <pre><span class="c">// Every request flows through this chain — no bypasses possible</span>
+<span class="k">let</span> app = <span class="t">Router</span>::new()
+    .nest(<span class="s">"/api"</span>, api_routes())
+    .nest(<span class="s">"/webhooks"</span>, webhook_routes())
+    .nest(<span class="s">"/ws"</span>, ws_routes())
+    .layer(
+        <span class="t">ServiceBuilder</span>::new()
+            .layer(<span class="t">TlsLayer</span>::new(tls_config))         <span class="c">// TLS first</span>
+            .layer(<span class="t">RateLimitLayer</span>::new(rl_config))     <span class="c">// then rate limit</span>
+            .layer(<span class="t">AuthLayer</span>::new(auth_store))         <span class="c">// then auth</span>
+            .layer(<span class="t">WorkspaceLayer</span>::new(workspaces))    <span class="c">// then workspace resolve</span>
+            .layer(<span class="t">ObsLayer</span>::new(tracer))              <span class="c">// then tracing</span>
+    );</pre>
+      </div>
+
+      <h3>Session State Machine</h3>
+      <p>Every UltraGravity session is a formal state machine with four states. Transitions are atomic, enforced by the
+        WarpQueue, and observable via OpenTelemetry:</p>
+
+      <div class="arch-diagram" style="padding:24px;">
+        <div
+          style="display:flex; align-items:center; justify-content:center; gap:0; flex-wrap:wrap; font-family:'JetBrains Mono',monospace; font-size:11px;">
+          <div
+            style="background:var(--surface); border:1px solid var(--border); padding:14px 18px; text-align:center; min-width:110px;">
+            <div style="color:var(--text-muted); font-size:9px; letter-spacing:2px; margin-bottom:4px;">STATE</div>
+            <div style="color:var(--text); font-weight:700;">IDLE</div>
+          </div>
+          <div style="color:var(--plasma); padding:0 8px; font-size:16px;">→</div>
+          <div
+            style="background:var(--plasma-glow); border:1px solid rgba(0,245,212,0.2); padding:14px 18px; text-align:center; min-width:110px;">
+            <div style="color:var(--text-muted); font-size:9px; letter-spacing:2px; margin-bottom:4px;">STATE</div>
+            <div style="color:var(--plasma); font-weight:700;">ASSEMBLING</div>
+          </div>
+          <div style="color:var(--plasma); padding:0 8px; font-size:16px;">→</div>
+          <div
+            style="background:rgba(245,166,35,0.05); border:1px solid rgba(245,166,35,0.2); padding:14px 18px; text-align:center; min-width:110px;">
+            <div style="color:var(--text-muted); font-size:9px; letter-spacing:2px; margin-bottom:4px;">STATE</div>
+            <div style="color:var(--amber); font-weight:700;">GENERATING</div>
+          </div>
+          <div style="color:var(--plasma); padding:0 8px; font-size:16px;">→</div>
+          <div
+            style="background:rgba(124,58,237,0.05); border:1px solid rgba(124,58,237,0.2); padding:14px 18px; text-align:center; min-width:110px;">
+            <div style="color:var(--text-muted); font-size:9px; letter-spacing:2px; margin-bottom:4px;">STATE</div>
+            <div style="color:#a78bfa; font-weight:700;">TOOL_EXEC</div>
+          </div>
+          <div style="color:var(--plasma); padding:0 8px; font-size:16px;">→</div>
+          <div
+            style="background:var(--surface); border:1px solid var(--border); padding:14px 18px; text-align:center; min-width:110px;">
+            <div style="color:var(--text-muted); font-size:9px; letter-spacing:2px; margin-bottom:4px;">STATE</div>
+            <div style="color:var(--text); font-weight:700;">PERSISTING</div>
+          </div>
+        </div>
+        <p
+          style="text-align:center; font-size:11px; color:var(--text-muted); margin-top:16px; font-family:'JetBrains Mono',monospace;">
+          Any state can transition to CANCELLED via CancellationToken. PERSISTING always completes even after cancel
+          (writes are atomic).
+        </p>
+      </div>
+
+      <h3>Configuration System</h3>
+      <p>UltraGravity uses a layered config system with clear precedence: environment variables override config file
+        values, which override defaults. All secrets are loaded from environment or a secrets backend (Vault, AWS SSM,
+        or 1Password CLI) — never stored in config files.</p>
+
+      <div class="code-block">
+        <div class="code-block-header">
+          <div class="code-block-title">gravity.toml — Configuration Schema</div>
+          <div class="code-block-lang">TOML</div>
+        </div>
+        <pre><span class="c"># ~/.gravity/gravity.toml</span>
+
+[gateway]
+bind = <span class="s">"loopback"</span>    <span class="c"># loopback | all | 0.0.0.0 (explicit override required)</span>
+port = <span class="v">18790</span>
+tls  = <span class="s">"auto"</span>        <span class="c"># auto | path/to/cert | disable (loopback only)</span>
+
+[llm]
+default_provider = <span class="s">"anthropic"</span>
+cost_budget_daily_usd = <span class="v">10.0</span>
+fallback_on_error = <span class="s">true</span>
+
+  [[llm.providers]]
+  id = <span class="s">"anthropic"</span>
+  api_key_env = <span class="s">"ANTHROPIC_API_KEY"</span>
+  models = [<span class="s">"claude-sonnet-4-6"</span>, <span class="s">"claude-opus-4-6"</span>]
+
+  [[llm.providers]]
+  id = <span class="s">"openai"</span>
+  api_key_env = <span class="s">"OPENAI_API_KEY"</span>
+  models = [<span class="s">"gpt-4o"</span>, <span class="s">"gpt-4o-mini"</span>]
+
+[memory]
+backend = <span class="s">"gravity-mem"</span>       <span class="c"># or plugin name</span>
+embedding_provider = <span class="s">"mistral"</span>   <span class="c"># or "local" (gguf model)</span>
+decay_half_life_days = <span class="v">30</span>
+
+[security]
+trust_model = <span class="s">"personal"</span>       <span class="c"># personal | team | enterprise</span>
+sandbox_tool_exec = <span class="s">true</span>
+prompt_injection_firewall = <span class="s">true</span>
+audit_log = <span class="s">"~/.gravity/audit.jsonl"</span>
+
+[channels.telegram]
+bot_token_env = <span class="s">"TELEGRAM_BOT_TOKEN"</span>
+allow_from = [<span class="s">"@yourusername"</span>]
+
+[channels.whatsapp]
+pairing_mode = <span class="s">"qr"</span>
+allow_from = [<span class="s">"+1234567890"</span>]</pre>
+      </div>
+    </section>
+
+    <!-- ═══════════════ 10. MEMORY ═══════════════ -->
+    <section class="section" id="memory">
+      <div class="section-label">
+        <span class="section-number">10</span>
+        <span class="section-tag">Memory Architecture</span>
+        <div class="section-line"></div>
+      </div>
+
+      <h2>GravityMem — <em>Hybrid Memory Engine</em></h2>
+
+      <p class="lead">Memory is what makes an AI agent feel genuinely intelligent over time. GravityMem is a
+        purpose-built memory system that goes far beyond what OpenClaw offers, combining four retrieval strategies into
+        a single fused result.</p>
+
+      <h3>Four Retrieval Strategies</h3>
+
+      <div class="cards">
+        <div class="card">
+          <div class="card-icon">🔢</div>
+          <h4>ANN Vector Search</h4>
+          <p>HNSW (Hierarchical Navigable Small World) index built on top of SQLite using a native Rust implementation.
+            Sub-millisecond approximate nearest neighbor search across hundreds of thousands of memory entries.</p>
+        </div>
+        <div class="card">
+          <div class="card-icon amber">🔤</div>
+          <h4>BM25 Full-Text Search</h4>
+          <p>SQLite FTS5 with BM25 ranking. Catches exact keyword matches that vector search misses, especially for
+            proper nouns, code identifiers, and specific dates.</p>
+        </div>
+        <div class="card">
+          <div class="card-icon violet">⏰</div>
+          <h4>Temporal Decay Model</h4>
+          <p>Every memory entry has an "importance score" that decays exponentially over time unless accessed. Recently
+            accessed or reinforced memories surface higher. Configurable half-life (default: 30 days).</p>
+        </div>
+        <div class="card">
+          <div class="card-icon crimson">🕸️</div>
+          <h4>Graph Memory (Entity Links)</h4>
+          <p>New vs. OpenClaw. Entity extraction builds a lightweight knowledge graph (person → organization, project →
+            deadline, etc.). Queries can traverse graph edges to pull in related context automatically.</p>
+        </div>
+      </div>
+
+      <h3>Memory Entry Schema</h3>
+
+      <div class="code-block">
+        <div class="code-block-header">
+          <div class="code-block-title">GravityMem — Memory Entry</div>
+          <div class="code-block-lang">Rust</div>
+        </div>
+        <pre><span class="k">pub struct</span> <span class="t">MemoryEntry</span> {
+    <span class="k">pub</span> id: <span class="t">Uuid</span>,
+    <span class="k">pub</span> workspace: <span class="t">WorkspaceId</span>,
+    <span class="k">pub</span> session_key: <span class="t">Option</span>&lt;<span class="t">SessionKey</span>&gt;,   <span class="c">// None = workspace-global</span>
+    <span class="k">pub</span> content: <span class="t">String</span>,                   <span class="c">// Human-readable text</span>
+    <span class="k">pub</span> embedding: <span class="t">Vec</span>&lt;<span class="t">f32</span>&gt;,               <span class="c">// Dimension: 1024 (Mistral) or 384 (local)</span>
+    <span class="k">pub</span> entities: <span class="t">Vec</span>&lt;<span class="t">Entity</span>&gt;,             <span class="c">// Extracted named entities</span>
+    <span class="k">pub</span> importance: <span class="t">f32</span>,                    <span class="c">// 0.0–1.0, decays over time</span>
+    <span class="k">pub</span> access_count: <span class="t">u32</span>,                 <span class="c">// Reinforcement tracking</span>
+    <span class="k">pub</span> created_at: <span class="t">DateTime</span>&lt;<span class="t">Utc</span>&gt;,
+    <span class="k">pub</span> last_accessed: <span class="t">DateTime</span>&lt;<span class="t">Utc</span>&gt;,
+    <span class="k">pub</span> source: <span class="t">MemorySource</span>,              <span class="c">// Conversation | Skill | External | Manual</span>
+    <span class="k">pub</span> tags: <span class="t">Vec</span>&lt;<span class="t">String</span>&gt;,
+}
+
+<span class="c">// Temporal decay formula (applied at read time, not write time)</span>
+<span class="k">fn</span> <span class="n">effective_score</span>(entry: &amp;<span class="t">MemoryEntry</span>, now: <span class="t">DateTime</span>&lt;<span class="t">Utc</span>&gt;) -&gt; <span class="t">f32</span> {
+    <span class="k">let</span> age_days = (now - entry.last_accessed).num_days() <span class="k">as</span> <span class="t">f32</span>;
+    <span class="k">let</span> decay = (-age_days / HALF_LIFE_DAYS).exp2();
+    entry.importance * decay * (<span class="v">1.0</span> + entry.access_count <span class="k">as</span> <span class="t">f32</span> * <span class="v">0.1</span>)
+}</pre>
+      </div>
+
+      <h3>Hybrid Recall — Score Fusion</h3>
+      <p>The four retrieval strategies each return a ranked list. GravityMem fuses these using Reciprocal Rank Fusion
+        (RRF), a well-studied algorithm that combines multiple ranked lists without requiring score normalization:</p>
+
+      <div class="code-block">
+        <div class="code-block-header">
+          <div class="code-block-title">Reciprocal Rank Fusion — Score Fusion</div>
+          <div class="code-block-lang">Rust</div>
+        </div>
+        <pre><span class="k">pub fn</span> <span class="n">rrf_fuse</span>(
+    vector_ranks: &amp;[<span class="t">Ranked</span>&lt;<span class="t">Uuid</span>&gt;],
+    bm25_ranks: &amp;[<span class="t">Ranked</span>&lt;<span class="t">Uuid</span>&gt;],
+    temporal_ranks: &amp;[<span class="t">Ranked</span>&lt;<span class="t">Uuid</span>&gt;],
+    k: <span class="t">f32</span>,  <span class="c">// typically 60.0</span>
+) -&gt; <span class="t">Vec</span>&lt;<span class="t">Uuid</span>&gt; {
+    <span class="k">let</span> <span class="k">mut</span> scores: <span class="t">HashMap</span>&lt;<span class="t">Uuid</span>, <span class="t">f32</span>&gt; = <span class="t">HashMap</span>::new();
+
+    <span class="k">for</span> list <span class="k">in</span> [vector_ranks, bm25_ranks, temporal_ranks] {
+        <span class="k">for</span> (rank, item) <span class="k">in</span> list.iter().enumerate() {
+            *scores.entry(item.id).or_default() += <span class="v">1.0</span> / (k + rank <span class="k">as</span> <span class="t">f32</span> + <span class="v">1.0</span>);
+        }
+    }
+
+    <span class="k">let mut</span> sorted: <span class="t">Vec</span>&lt;_&gt; = scores.into_iter().collect();
+    sorted.sort_by(|a, b| b.<span class="v">1</span>.partial_cmp(&amp;a.<span class="v">1</span>).unwrap());
+    sorted.into_iter().map(|(id, _)| id).collect()
+}</pre>
+      </div>
+
+      <h3>Memory Files — Human-Readable First</h3>
+      <p>Following OpenClaw's excellent practice, all user-facing memory is additionally exported as Markdown files in
+        <code>~/.gravity/workspace/memories/</code>. You can open them in any text editor, edit them, and the changes
+        sync back into the vector index on next startup. Memory is never a black box.
+      </p>
+    </section>
+
+    <!-- ═══════════════ 11. SKILLS ENGINE ═══════════════ -->
+    <section class="section" id="skills">
+      <div class="section-label">
+        <span class="section-number">11</span>
+        <span class="section-tag">Skills Engine</span>
+        <div class="section-line"></div>
+      </div>
+
+      <h2>Skills Engine — <em>Typed, Compiled, Self-Authoring</em></h2>
+
+      <p class="lead">OpenClaw's SKILL.md approach is genius in its simplicity. UltraGravity keeps the simplicity but
+        adds a typed manifest, a compiled skill graph, semantic pre-selection, and the ability for the agent to write
+        and deploy new skills mid-conversation without any human file system access.</p>
+
+      <h3>Skill Manifest Format</h3>
+
+      <div class="code-block">
+        <div class="code-block-header">
+          <div class="code-block-title">SKILL.md — Enhanced Manifest</div>
+          <div class="code-block-lang">Markdown + YAML Frontmatter</div>
+        </div>
+        <pre><span class="c">---</span>
+<span class="t">name</span>: github-pr-reviewer
+<span class="t">version</span>: <span class="s">"1.2.0"</span>
+<span class="t">description</span>: <span class="s">"Review GitHub pull requests, summarize changes, suggest improvements"</span>
+<span class="t">triggers</span>:                    <span class="c"># Semantic triggers for pre-selection</span>
+  - <span class="s">"review PR"</span>
+  - <span class="s">"pull request"</span>
+  - <span class="s">"code review"</span>
+  - <span class="s">"github diff"</span>
+<span class="t">requires_tools</span>: [bash]       <span class="c"># Tool capabilities this skill needs</span>
+<span class="t">requires_trust</span>: Trusted      <span class="c"># Min trust level to activate</span>
+<span class="t">schedule</span>: null               <span class="c"># Or cron expression for heartbeat</span>
+<span class="t">author</span>: <span class="s">"@yourhandle"</span>
+<span class="t">tags</span>: [github, code, review]
+<span class="c">---</span>
+
+<span class="c"># GitHub PR Reviewer</span>
+
+When the user asks to review a pull request, follow this workflow:
+
+1. Extract the PR URL or number from the message
+2. Use `gh pr view {number} --json files,title,body,additions,deletions` to fetch PR data
+3. For each changed file, analyze: purpose of change, potential bugs, style issues
+4. Summarize in the format: **Summary** → **Concerns** → **Suggestions**
+
+## Output Format
+Always use structured markdown with severity labels: 🔴 Critical, 🟡 Warning, 🟢 Suggestion</pre>
+      </div>
+
+      <h3>The Skill Graph</h3>
+      <p>At startup and on hot-reload, GravitySkills compiles all SKILL.md files into a <strong>Skill Graph</strong> — a
+        vector-indexed, in-memory data structure that enables sub-5ms semantic skill pre-selection. Only skill names,
+        descriptions, and trigger phrases are indexed at startup (~97 bytes per skill). Full content is loaded only when
+        a skill is selected for a turn.</p>
+
+      <h3>Self-Authoring Skills</h3>
+      <p>One of UltraGravity's most powerful features: the agent can write and deploy new skills within a conversation.
+        The user says "create a skill for tracking my wine collection" and the agent:</p>
+      <ol style="font-size:13px; color:var(--text-dim); line-height:2; padding-left:20px;">
+        <li>Generates a complete, valid SKILL.md file with proper frontmatter</li>
+        <li>Writes it to the skills directory via the File tool (sandboxed to skills path only)</li>
+        <li>The GravitySkills watcher detects the file change via inotify/kqueue</li>
+        <li>Recompiles the skill graph — within 200ms the skill is live</li>
+        <li>Confirms to the user with the skill's semantic triggers</li>
+      </ol>
+    </section>
+
+    <!-- ═══════════════ 12. MULTI-AGENT ═══════════════ -->
+    <section class="section" id="multi-agent">
+      <div class="section-label">
+        <span class="section-number">12</span>
+        <span class="section-tag">Multi-Agent System</span>
+        <div class="section-line"></div>
+      </div>
+
+      <h2>GravityMesh — <em>Native Multi-Agent</em></h2>
+
+      <p class="lead">OpenClaw has basic multi-agent session tools. UltraGravity ships a full agent mesh with capability
+        negotiation, parallel execution, and streamed result aggregation — all within the same runtime.</p>
+
+      <h3>Agent Roles</h3>
+
+      <div class="cards">
+        <div class="card">
+          <div class="card-icon">🎯</div>
+          <h4>Orchestrator Agent</h4>
+          <p>The user-facing agent. Receives the user's message, breaks it into subtasks, dispatches to specialist
+            agents, aggregates results, and delivers the unified response. Never executes tools directly.</p>
+        </div>
+        <div class="card">
+          <div class="card-icon amber">⚙️</div>
+          <h4>Specialist Agents</h4>
+          <p>Spawned on-demand per subtask. Have a constrained tool set (e.g., a "WebSearch Agent" only has browser
+            access). Operate in parallel. Results streamed back to the orchestrator as they complete.</p>
+        </div>
+        <div class="card">
+          <div class="card-icon violet">👀</div>
+          <h4>Observer Agents</h4>
+          <p>Long-running background agents that monitor external sources (RSS feeds, APIs, price trackers) and push
+            events into the orchestrator's queue when thresholds are crossed. Persistent heartbeat mode.</p>
+        </div>
+      </div>
+
+      <h3>Execution Model</h3>
+
+      <div class="code-block">
+        <div class="code-block-header">
+          <div class="code-block-title">Multi-Agent Parallel Dispatch</div>
+          <div class="code-block-lang">Rust</div>
+        </div>
+        <pre><span class="c">// Orchestrator decomposes task and fires specialists in parallel</span>
+<span class="k">pub async fn</span> <span class="n">orchestrate</span>(
+    task: &amp;<span class="t">str</span>,
+    mesh: &amp;<span class="t">GravityMesh</span>,
+) -&gt; <span class="t">OrchestratorResult</span> {
+
+    <span class="c">// LLM decomposes into subtasks with capability requirements</span>
+    <span class="k">let</span> subtasks = decompose(task).<span class="k">await</span>;
+
+    <span class="c">// Spawn specialists in parallel — results stream as they complete</span>
+    <span class="k">let</span> <span class="k">mut</span> handles = <span class="t">JoinSet</span>::new();
+    <span class="k">for</span> subtask <span class="k">in</span> subtasks {
+        <span class="k">let</span> agent = mesh.spawn_specialist(&amp;subtask.required_caps).<span class="k">await</span>;
+        handles.spawn(<span class="k">async move</span> {
+            agent.execute(subtask).<span class="k">await</span>
+        });
+    }
+
+    <span class="c">// Aggregate results as they stream in</span>
+    <span class="k">let</span> <span class="k">mut</span> results = <span class="t">Vec</span>::new();
+    <span class="k">while let</span> <span class="t">Some</span>(r) = handles.join_next().<span class="k">await</span> {
+        results.push(r?);
+    }
+
+    synthesize(results).<span class="k">await</span>  <span class="c">// LLM synthesizes final response</span>
+}</pre>
+      </div>
+    </section>
+
+    <!-- ═══════════════ 13. E2E WORKFLOW ═══════════════ -->
+    <section class="section" id="workflow">
+      <div class="section-label">
+        <span class="section-number">13</span>
+        <span class="section-tag">End-to-End Workflow</span>
+        <div class="section-line"></div>
+      </div>
+
+      <h2>Complete <em>Message Lifecycle</em></h2>
+
+      <p class="lead">Tracing a single WhatsApp message from receipt to response delivery, with timing targets at each
+        stage.</p>
+
+      <div class="timeline">
+        <div class="timeline-item">
+          <div class="timeline-phase">T+0ms — Ingestion</div>
+          <div class="timeline-title">WhatsApp WebSocket Event Received</div>
+          <div class="timeline-body">The WhatsApp channel adapter (L1) receives a <code>messages.upsert</code> event
+            from Baileys. Raw message decoded, sender identified, media downloaded if present. Message normalized to
+            <code>InboundMessage</code> with <code>TrustLevel::Paired</code>.
+          </div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-phase">T+1ms — Auth & Access Control</div>
+          <div class="timeline-title">GravityGate Authorization Check</div>
+          <div class="timeline-body">Sender's phone number checked against workspace allowlist. DM policy evaluated. If
+            pairing required and not yet paired, pairing flow initiated and message rejected. All checks O(1) via
+            pre-loaded hash map.</div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-phase">T+2ms — Queue Enqueue</div>
+          <div class="timeline-title">WarpQueue — Session Key Resolution + Enqueue</div>
+          <div class="timeline-body">Session key <code>workspace:whatsapp:+1234567890</code> computed. Task enqueued
+            with <code>Priority::Normal</code>. If session is idle, task starts immediately. If session is GENERATING,
+            task queues behind current turn. No blocking.</div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-phase">T+3ms — Parallel Retrieval (fired simultaneously)</div>
+          <div class="timeline-title">GravityMem Hybrid Recall + History Load + Skill Select</div>
+          <div class="timeline-body">Three async operations fire in parallel via <code>tokio::join!</code>: (1) ANN
+            vector search + BM25 + temporal re-rank in GravityMem, (2) recent session history loaded from SQLite WAL,
+            (3) semantic skill pre-selection against compiled skill graph. All three complete within ~15ms total.</div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-phase">T+18ms — Context Sealed</div>
+          <div class="timeline-title">GravityCore Context Assembly Complete</div>
+          <div class="timeline-body">Parallel retrieval results fused. Context object assembled with all 6 layers
+            (GravityCore rules → workspace config → skills → memories → history → user message). Context sealed and
+            immutable. GravityShield injects [UNTRUSTED-USER-INPUT] label on user content.</div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-phase">T+20ms — LLM Invoked</div>
+          <div class="timeline-title">LLM Router Selects Provider — Streaming Begins</div>
+          <div class="timeline-body">LLM Router evaluates provider health and cost budget. Selects Claude Sonnet 4
+            (default). Streaming POST to Anthropic API. First token typically arrives in 300–800ms. Streamed tokens
+            forwarded to WhatsApp adapter in near-real time (typing indicator active).</div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-phase">T+20ms+tool_time — Tool Execution (if needed)</div>
+          <div class="timeline-title">GravityShield Sandbox — Tool Dispatch</div>
+          <div class="timeline-body">If the model emits tool calls, GravityShield validates each tool call against the
+            session's capability bitmask. Approved calls dispatched to sandboxed child processes (Landlock + seccomp).
+            Results returned as tool result blocks, appended to context, model continues streaming.</div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-phase">T+stream_end — Response Delivery</div>
+          <div class="timeline-title">WhatsApp Adapter — Format + Send</div>
+          <div class="timeline-body">Complete response formatted for WhatsApp: markdown normalized to WA-compatible
+            format, long messages chunked at paragraph boundaries, media files uploaded separately. Sent via Baileys
+            <code>sendMessage</code>.
+          </div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-phase">T+stream_end+async — Persistence (Non-blocking)</div>
+          <div class="timeline-title">GravityMem Background Write</div>
+          <div class="timeline-body">Turn persisted to SQLite WAL. Memory extraction runs asynchronously: entity
+            extraction, importance scoring, embedding generation, HNSW index insertion. User response is never delayed
+            waiting for this. Audit log entry written. OpenTelemetry span closed.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════════ 14. SECURITY ═══════════════ -->
+    <section class="section" id="security">
+      <div class="section-label">
+        <span class="section-number">14</span>
+        <span class="section-tag">Security Architecture</span>
+        <div class="section-line"></div>
+      </div>
+
+      <h2>GravityShield — <em>Defense in Depth</em></h2>
+
+      <p class="lead">OpenClaw's security is "defensible but shallow." GravityShield implements six independent security
+        layers, each of which stops a distinct class of attacks. Bypassing any single layer requires defeating all inner
+        layers too.</p>
+
+      <div class="security-ring">
+        <div class="sec-layer L1">
+          <div class="sec-layer-num">L1</div>
+          <div class="sec-layer-body">
+            <div class="sec-layer-name">Network Perimeter</div>
+            <div class="sec-layer-desc">Loopback-only bind by default. TLS enforced for all non-loopback. HMAC webhook
+              signature verification before payload parse. No publicly accessible ports unless explicitly configured
+              with token auth.</div>
+          </div>
+        </div>
+        <div class="sec-layer L2">
+          <div class="sec-layer-num">L2</div>
+          <div class="sec-layer-body">
+            <div class="sec-layer-name">Authentication & Identity</div>
+            <div class="sec-layer-desc">Per-channel allowlists. Device pairing protocol with QR + TOTP for CLI access.
+              JWT tokens with 1-hour expiry for API access. No anonymous access to any endpoint by default. Rate
+              limiting per identity, not per IP.</div>
+          </div>
+        </div>
+        <div class="sec-layer L3">
+          <div class="sec-layer-num">L3</div>
+          <div class="sec-layer-body">
+            <div class="sec-layer-name">Trust Level System</div>
+            <div class="sec-layer-desc">Four trust levels: Owner, Trusted, Paired, Guest. Trust level assigned by the
+              channel adapter and immutable at the message struct level. Trust level governs which tools, which skills,
+              and which capabilities are available. Never derived from message content.</div>
+          </div>
+        </div>
+        <div class="sec-layer L4">
+          <div class="sec-layer-num">L4</div>
+          <div class="sec-layer-body">
+            <div class="sec-layer-name">Structural Prompt Injection Firewall</div>
+            <div class="sec-layer-desc">All user-sourced content (messages, tool results, web scrapes) is labeled
+              [UNTRUSTED-USER-INPUT] at the context assembly level. GravityCore rules (injected as Layer 0, never
+              visible to user) explicitly instruct the model to treat this label as a hard trust boundary.
+              Architecturally prevents role-escalation injection.</div>
+          </div>
+        </div>
+        <div class="sec-layer L5">
+          <div class="sec-layer-num">L5</div>
+          <div class="sec-layer-body">
+            <div class="sec-layer-name">Tool Execution Sandbox</div>
+            <div class="sec-layer-desc">Every tool execution spawns an isolated child process. Linux: Landlock
+              filesystem restrictions + seccomp-bpf syscall filter. macOS: App Sandbox + file quarantine. Capability
+              bitmask (read_fs, write_fs, network, exec) granted per-session based on trust level. No tool can exceed
+              its declared capability surface.</div>
+          </div>
+        </div>
+        <div class="sec-layer L6">
+          <div class="sec-layer-num">L6</div>
+          <div class="sec-layer-body">
+            <div class="sec-layer-name">Audit Log & Content Policy</div>
+            <div class="sec-layer-desc">Every tool call, model invocation, skill activation, and trust decision is
+              written to a tamper-evident append-only audit log (JSONL with chained hashes). Content policy engine
+              evaluates LLM outputs before delivery. Configurable output filters for PII, sensitive credentials, and
+              custom regexes.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════════ 15. THREAT MODEL ═══════════════ -->
+    <section class="section" id="threat-model">
+      <div class="section-label">
+        <span class="section-number">15</span>
+        <span class="section-tag">Threat Model</span>
+        <div class="section-line"></div>
+      </div>
+
+      <h2>Threat Model & <em>Mitigations</em></h2>
+
+      <table class="compare-table">
+        <thead>
+          <tr>
+            <th>Threat</th>
+            <th>OpenClaw Mitigation</th>
+            <th>UltraGravity Mitigation</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Prompt Injection via user message</td>
+            <td>Heuristic system prompt check, partial</td>
+            <td>[UNTRUSTED-USER-INPUT] structural label at context assembly — architectural, not heuristic</td>
+          </tr>
+          <tr>
+            <td>Prompt Injection via tool result</td>
+            <td>Not explicitly mitigated</td>
+            <td>All tool results also labeled [UNTRUSTED-TOOL-RESULT] before re-injection into context</td>
+          </tr>
+          <tr>
+            <td>Malicious skill installation</td>
+            <td>File system access controls only</td>
+            <td>Skill manifest schema validation, capability declaration audit, signed community skills registry</td>
+          </tr>
+          <tr>
+            <td>Data exfiltration via tool call</td>
+            <td>Network access unrestricted in tool processes</td>
+            <td>Capability bitmask: network access is a declared, audited permission. Non-network skills get no outbound
+              access via seccomp</td>
+          </tr>
+          <tr>
+            <td>Supply chain attack via npm dependency</td>
+            <td>npm ecosystem (high risk surface)</td>
+            <td>Core binary in Rust (no npm). TS SDK is sandboxed plugin layer only, isolated from core runtime</td>
+          </tr>
+          <tr>
+            <td>Credential theft from config</td>
+            <td>Credentials in ~/.openclaw/ directory</td>
+            <td>API keys only loaded from env vars or secrets backends (Vault/SSM). Never stored in gravity.toml</td>
+          </tr>
+          <tr>
+            <td>Unauthorized user gaining agent access</td>
+            <td>Allowlists per channel</td>
+            <td>Allowlists + pairing + TOTP for Owner access + per-action trust checks at GravityShield</td>
+          </tr>
+          <tr>
+            <td>Race condition in concurrent tool execution</td>
+            <td>Lane Queue prevents per-session</td>
+            <td>WarpQueue + Rust ownership model — data races are compile-time impossible</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- ═══════════════ 16. TOOL SANDBOXING ═══════════════ -->
+    <section class="section" id="sandbox">
+      <div class="section-label">
+        <span class="section-number">16</span>
+        <span class="section-tag">Tool Security</span>
+        <div class="section-line"></div>
+      </div>
+
+      <h2>Tool Sandboxing — <em>Landlock + seccomp</em></h2>
+
+      <p class="lead">UltraGravity's tool execution is hardened at the operating system level. This is not something
+        OpenClaw does at all — it runs tool processes with the full permissions of the parent Node.js process.</p>
+
+      <h3>Capability Bitmask System</h3>
+
+      <div class="code-block">
+        <div class="code-block-header">
+          <div class="code-block-title">Tool Capability Declaration</div>
+          <div class="code-block-lang">Rust</div>
+        </div>
+        <pre><span class="k">bitflags!</span> {
+    <span class="k">pub struct</span> <span class="t">ToolCapabilities</span>: <span class="t">u32</span> {
+        <span class="k">const</span> READ_FS_WORKSPACE  = <span class="v">0b00000001</span>;   <span class="c">// read workspace dir only</span>
+        <span class="k">const</span> WRITE_FS_WORKSPACE = <span class="v">0b00000010</span>;   <span class="c">// write workspace dir only</span>
+        <span class="k">const</span> READ_FS_HOME       = <span class="v">0b00000100</span>;   <span class="c">// read user home dir</span>
+        <span class="k">const</span> WRITE_FS_HOME      = <span class="v">0b00001000</span>;   <span class="c">// write user home dir</span>
+        <span class="k">const</span> EXEC_SUBPROCESS    = <span class="v">0b00010000</span>;   <span class="c">// spawn child processes</span>
+        <span class="k">const</span> NETWORK_OUTBOUND   = <span class="v">0b00100000</span>;   <span class="c">// outbound TCP/UDP</span>
+        <span class="k">const</span> NETWORK_LISTEN     = <span class="v">0b01000000</span>;   <span class="c">// bind to local port</span>
+        <span class="k">const</span> READ_CREDENTIALS   = <span class="v">0b10000000</span>;   <span class="c">// access credentials store</span>
+    }
+}
+
+<span class="c">// Trust level → capability grant mapping</span>
+<span class="k">impl</span> <span class="t">TrustLevel</span> {
+    <span class="k">pub fn</span> <span class="n">default_caps</span>(&amp;<span class="k">self</span>) -&gt; <span class="t">ToolCapabilities</span> {
+        <span class="k">match</span> <span class="k">self</span> {
+            <span class="t">Owner</span>   =&gt; <span class="t">ToolCapabilities</span>::all(),
+            <span class="t">Trusted</span> =&gt; READ_FS_WORKSPACE | WRITE_FS_WORKSPACE | NETWORK_OUTBOUND,
+            <span class="t">Paired</span>  =&gt; READ_FS_WORKSPACE | NETWORK_OUTBOUND,
+            <span class="t">Guest</span>   =&gt; <span class="t">ToolCapabilities</span>::empty(),  <span class="c">// no tools at all</span>
+        }
+    }
+}</pre>
+      </div>
+
+      <div class="callout crimson">
+        <div class="callout-title">Linux Landlock Implementation</div>
+        <p>On Linux, each tool subprocess is spawned with a Landlock ruleset applied before the subprocess's code runs.
+          The ruleset allows only the directories corresponding to the granted capability flags. A
+          <code>READ_FS_WORKSPACE</code> grant allows <code>O_RDONLY</code> on <code>~/.gravity/workspace/</code> and
+          nothing else. seccomp-bpf then further filters the allowed syscalls to a minimal set (read, write, open, stat,
+          close, mmap, munmap, exit). Even if a tool's code is compromised, it cannot exfiltrate data, spawn network
+          connections, or write outside its permitted paths.
+        </p>
+      </div>
+    </section>
+
+    <!-- ═══════════════ 17. UX ═══════════════ -->
+    <section class="section" id="ux">
+      <div class="section-label">
+        <span class="section-number">17</span>
+        <span class="section-tag">User Experience</span>
+        <div class="section-line"></div>
+      </div>
+
+      <h2>User Experience — <em>Zero Friction</em></h2>
+
+      <p class="lead">OpenClaw requires users to manage Node.js, npm, environment variables, and YAML config files.
+        UltraGravity's first design principle is: a non-developer user should be fully set up in under 5 minutes.</p>
+
+      <h3>Setup Flow</h3>
+
+      <div class="flow">
+        <div class="flow-step active">
+          <div class="flow-step-inner">
+            <div class="flow-num">01</div>
+            <div class="flow-name">One-Line Install</div>
+            <div class="flow-desc">Single binary or curl | sh. No Node, no npm, no Python. 30MB executable, starts in
+              &lt;300ms.</div>
+          </div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-step-inner">
+            <div class="flow-num">02</div>
+            <div class="flow-name">gravity setup</div>
+            <div class="flow-desc">Interactive CLI wizard. API key entry (masked). First channel selection.
+              Auto-generates config.</div>
+          </div>
+        </div>
+        <div class="flow-step active">
+          <div class="flow-step-inner">
+            <div class="flow-num">03</div>
+            <div class="flow-name">Channel Connect</div>
+            <div class="flow-desc">QR code for WhatsApp in terminal. Bot token prompt for Telegram. Each in ~60 seconds.
+            </div>
+          </div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-step-inner">
+            <div class="flow-num">04</div>
+            <div class="flow-name">Running</div>
+            <div class="flow-desc">gravity start. Process manager integration optional (systemd/launchd). Web UI at
+              localhost:18790.</div>
+          </div>
+        </div>
+      </div>
+
+      <h3>Web Control Panel</h3>
+      <p>The Web UI (served by GravityGate on port 18790) is a production-grade React application that goes far beyond
+        OpenClaw's basic control panel:</p>
+
+      <div class="cards">
+        <div class="card">
+          <div class="card-icon">📡</div>
+          <h4>Live Session Monitor</h4>
+          <p>Real-time feed of all active sessions. See current state (IDLE / GENERATING / TOOL_EXEC), active tool
+            calls, token streaming, and cost accrual per session.</p>
+        </div>
+        <div class="card">
+          <div class="card-icon amber">✏️</div>
+          <h4>Skill Editor</h4>
+          <p>In-browser SKILL.md editor with live preview, trigger testing, and hot-deploy without restarting the
+            runtime. Syntax highlighting for YAML frontmatter.</p>
+        </div>
+        <div class="card">
+          <div class="card-icon violet">🧠</div>
+          <h4>Memory Browser</h4>
+          <p>Searchable table of all memory entries. View embeddings (2D t-SNE projection), edit importance scores,
+            delete entries, see graph relationships between entities.</p>
+        </div>
+        <div class="card">
+          <div class="card-icon crimson">📊</div>
+          <h4>Agent Graph</h4>
+          <p>Visual representation of active multi-agent sessions. See orchestrator → specialist relationships, parallel
+            execution branches, and result flow.</p>
+        </div>
+        <div class="card">
+          <div class="card-icon">💰</div>
+          <h4>Cost Dashboard</h4>
+          <p>Per-session, per-day, per-model token and cost breakdown. Budget alert thresholds. Provider comparison
+            charts.</p>
+        </div>
+        <div class="card">
+          <div class="card-icon amber">🔒</div>
+          <h4>Security Audit Log</h4>
+          <p>Filterable audit trail of all tool executions, trust decisions, capability grants, and policy evaluations.
+            Export as JSONL.</p>
+        </div>
+      </div>
+
+      <h3>CLI — gravity</h3>
+
+      <div class="code-block">
+        <div class="code-block-header">
+          <div class="code-block-title">CLI Commands</div>
+          <div class="code-block-lang">bash</div>
+        </div>
+        <pre>gravity setup                   <span class="c"># Interactive first-run wizard</span>
+gravity start                   <span class="c"># Start the runtime (foreground)</span>
+gravity start --daemon          <span class="c"># Start as background daemon</span>
+gravity stop                    <span class="c"># Stop gracefully</span>
+gravity status                  <span class="c"># Runtime health, session count, uptime</span>
+
+gravity chat                    <span class="c"># Local terminal chat (no messaging app needed)</span>
+gravity chat --session myagent  <span class="c"># Chat with named session/agent</span>
+
+gravity skill list              <span class="c"># List all loaded skills</span>
+gravity skill new "my idea"     <span class="c"># Scaffold a new skill via AI</span>
+gravity skill edit &lt;name&gt;       <span class="c"># Open skill in $EDITOR</span>
+gravity skill test &lt;name&gt;       <span class="c"># Run skill with test prompt</span>
+
+gravity memory search "query"   <span class="c"># Hybrid memory search from CLI</span>
+gravity memory add "fact"       <span class="c"># Manually inject a memory entry</span>
+gravity memory export           <span class="c"># Export all memories as Markdown</span>
+
+gravity channel add telegram    <span class="c"># Interactive channel setup wizard</span>
+gravity channel list            <span class="c"># Show all configured channels + status</span>
+
+gravity doctor                  <span class="c"># Diagnose config, security, and connectivity issues</span>
+gravity update                  <span class="c"># Self-update binary to latest release</span></pre>
+      </div>
+    </section>
+
+    <!-- ═══════════════ 18. PLUGINS ═══════════════ -->
+    <section class="section" id="plugins">
+      <div class="section-label">
+        <span class="section-number">18</span>
+        <span class="section-tag">Plugin Ecosystem</span>
+        <div class="section-line"></div>
+      </div>
+
+      <h2>Plugin Ecosystem — <em>TypeScript SDK on Rust Core</em></h2>
+
+      <p class="lead">UltraGravity's plugin system uses a language boundary to give the best of both worlds: the safety
+        and performance of Rust for the core, and the developer ergonomics of TypeScript for extension authors.</p>
+
+      <h3>Plugin Types</h3>
+
+      <div class="cards">
+        <div class="card">
+          <div class="card-icon">📡</div>
+          <h4>Channel Plugins</h4>
+          <p>Implement <code>ChannelAdapter</code> interface. Auto-discovered from <code>extensions/</code>. Can be
+            published as npm packages with <code>gravity-channel-</code> prefix.</p>
+        </div>
+        <div class="card">
+          <div class="card-icon amber">🔧</div>
+          <h4>Tool Plugins</h4>
+          <p>New callable tools exposed to the agent. Declare capability requirements in manifest. Sandboxed
+            automatically like built-in tools.</p>
+        </div>
+        <div class="card">
+          <div class="card-icon violet">🧠</div>
+          <h4>Memory Backend Plugins</h4>
+          <p>Replace GravityMem with custom backends: PostgreSQL + pgvector, Pinecone, Chroma, Weaviate. Implement
+            <code>MemoryBackend</code> trait.
+          </p>
+        </div>
+        <div class="card">
+          <div class="card-icon crimson">🤖</div>
+          <h4>LLM Provider Plugins</h4>
+          <p>Add new model providers (Mistral, Cohere, self-hosted Ollama, etc.). Implement <code>LLMProvider</code>
+            trait. Automatically available to the LLM Router.</p>
+        </div>
+      </div>
+
+      <h3>Plugin Manifest</h3>
+
+      <div class="code-block">
+        <div class="code-block-header">
+          <div class="code-block-title">package.json — Plugin Discovery</div>
+          <div class="code-block-lang">JSON</div>
+        </div>
+        <pre>{
+  <span class="s">"name"</span>: <span class="s">"@gravity/channel-matrix"</span>,
+  <span class="s">"version"</span>: <span class="s">"1.0.0"</span>,
+  <span class="s">"gravity"</span>: {
+    <span class="s">"type"</span>: <span class="s">"channel"</span>,
+    <span class="s">"id"</span>: <span class="s">"matrix"</span>,
+    <span class="s">"display_name"</span>: <span class="s">"Matrix"</span>,
+    <span class="s">"schema"</span>: <span class="s">"./schema.json"</span>,       <span class="c">// config schema for setup wizard</span>
+    <span class="s">"entry"</span>: <span class="s">"./dist/index.js"</span>,
+    <span class="s">"min_gravity_version"</span>: <span class="s">"1.0.0"</span>,
+    <span class="s">"capabilities_required"</span>: [<span class="s">"NETWORK_OUTBOUND"</span>]
+  }
+}</pre>
+      </div>
+    </section>
+
+    <!-- ═══════════════ 19. DEPLOYMENT ═══════════════ -->
+    <section class="section" id="deployment">
+      <div class="section-label">
+        <span class="section-number">19</span>
+        <span class="section-tag">Deployment</span>
+        <div class="section-line"></div>
+      </div>
+
+      <h2>Deployment <em>Options</em></h2>
+
+      <div class="cards">
+        <div class="card">
+          <div class="card-icon">🖥️</div>
+          <h4>macOS / Linux Binary</h4>
+          <p><code>curl -fsSL gravity.run/install | sh</code> — single static binary, systemd/launchd service template
+            included. No runtime dependencies.</p>
+        </div>
+        <div class="card">
+          <div class="card-icon amber">🐳</div>
+          <h4>Docker</h4>
+          <p>Multi-stage Dockerfile. Final image: ~45MB (Alpine base + gravity binary).
+            <code>docker run -e ANTHROPIC_API_KEY=... ghcr.io/ultragravity/gravity</code>.
+          </p>
+        </div>
+        <div class="card">
+          <div class="card-icon violet">☸️</div>
+          <h4>Kubernetes</h4>
+          <p>Official Helm chart. StatefulSet for session persistence. HPA configured for multi-workspace enterprise
+            deployments. ConfigMap + Secret integration.</p>
+        </div>
+        <div class="card">
+          <div class="card-icon crimson">🛩️</div>
+          <h4>Fly.io One-Click</h4>
+          <p>Pre-configured fly.toml. Persistent volume for SQLite WAL. Fly Secrets for API keys. Deploy command in
+            README: <code>fly launch</code>.</p>
+        </div>
+        <div class="card">
+          <div class="card-icon">🚂</div>
+          <h4>Railway Template</h4>
+          <p>One-click Railway.app template. Auto-provisions persistent storage. Env var UI for API keys. Public HTTPS
+            URL via Railway proxy.</p>
+        </div>
+        <div class="card">
+          <div class="card-icon amber">🍎</div>
+          <h4>macOS App (Menu Bar)</h4>
+          <p>Native Swift menu bar app wrapping the gravity binary. Quick session switching, skill browser, one-click
+            start/stop. Distributed via Homebrew Cask.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════════ 20. OBSERVABILITY ═══════════════ -->
+    <section class="section" id="obs">
+      <div class="section-label">
+        <span class="section-number">20</span>
+        <span class="section-tag">Observability</span>
+        <div class="section-line"></div>
+      </div>
+
+      <h2>Full-Stack <em>Observability</em></h2>
+
+      <p>OpenClaw has basic logs. UltraGravity ships OpenTelemetry native — every layer emits traces, metrics, and
+        structured logs to any OTLP-compatible backend (Grafana, Jaeger, Datadog, Honeycomb):</p>
+
+      <ul>
+        <li><strong>Distributed Traces</strong> — Every message has a root span from ingestion to delivery. Child spans
+          for context assembly, memory retrieval, model invocation, tool execution, and persistence. P50/P95/P99 latency
+          visible per stage.</li>
+        <li><strong>Metrics</strong> — Session count, queue depth per session, token throughput, cost per workspace,
+          memory hit rate, tool execution latency, LLM provider error rate.</li>
+        <li><strong>Structured Logs</strong> — Every log line includes trace_id, session_key, workspace_id, and stage.
+          No text grep needed — log aggregation tools can query these fields directly.</li>
+        <li><strong>Bundled Grafana Dashboard</strong> — A complete <code>dashboards/gravity.json</code> Grafana
+          dashboard template ships in the repo. Import and point at your OTLP endpoint.</li>
+      </ul>
+    </section>
+
+    <!-- ═══════════════ 21. ROADMAP ═══════════════ -->
+    <section class="section" id="roadmap">
+      <div class="section-label">
+        <span class="section-number">21</span>
+        <span class="section-tag">Roadmap</span>
+        <div class="section-line"></div>
+      </div>
+
+      <h2>Execution <em>Roadmap</em></h2>
+
+      <div class="timeline">
+        <div class="timeline-item">
+          <div class="timeline-phase">Phase 0 — Weeks 1–4</div>
+          <div class="timeline-title">Foundation: GravityGate + WarpQueue + GravityMem</div>
+          <div class="timeline-body">Build the Rust core. GravityGate serving HTTP/WS. WarpQueue with per-session serial
+            execution. GravityMem with SQLite WAL + basic vector search. CLI with <code>gravity start</code>,
+            <code>gravity chat</code>, <code>gravity status</code>. No channels yet — just local terminal chat proving
+            the loop.
+          </div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-phase">Phase 1 — Weeks 5–8</div>
+          <div class="timeline-title">Agent Loop: GravityCore + LLM Router + Tools</div>
+          <div class="timeline-body">Implement GravityCore agent loop. LLM Router with Anthropic + OpenAI. Built-in
+            tools: bash, file, browser (headless Chromium). GravityShield skeleton with capability bitmasks. First
+            working end-to-end turn: receive message → assemble context → invoke LLM → execute tool → stream response.
+          </div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-phase">Phase 2 — Weeks 9–12</div>
+          <div class="timeline-title">Channels: Telegram + WhatsApp + Discord + Slack</div>
+          <div class="timeline-body">Implement first four channels. Channel adapter interface finalized. Normalized
+            InboundMessage type finalized. Access control and pairing flows working. Skills engine with SKILL.md
+            parsing, semantic pre-selection, and hot-reload. First public alpha release.</div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-phase">Phase 3 — Weeks 13–18</div>
+          <div class="timeline-title">Memory + Security: GravityMem Full + GravityShield</div>
+          <div class="timeline-body">Full hybrid memory: HNSW ANN + BM25 + temporal decay + entity graph. RRF score
+            fusion. GravityShield: Landlock + seccomp on Linux, App Sandbox on macOS. Structural prompt injection
+            firewall. Audit log. Memory browser in Web UI. Beta release.</div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-phase">Phase 4 — Weeks 19–24</div>
+          <div class="timeline-title">Multi-Agent Mesh + Full Web UI + Remaining Channels</div>
+          <div class="timeline-body">GravityMesh orchestrator/specialist model. All 12 built-in channels. Full React Web
+            UI: session monitor, skill editor, cost dashboard, agent graph. TypeScript plugin SDK with documentation.
+            OpenTelemetry integration. v1.0 production release.</div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-phase">Phase 5 — Months 7–12</div>
+          <div class="timeline-title">Enterprise: Multi-Tenant + RBAC + Kubernetes + Marketplace</div>
+          <div class="timeline-body">Workspace multi-tenancy. Per-user RBAC. Kubernetes Helm chart. Managed cloud
+            offering (UltraGravity Cloud). Community skill and plugin marketplace with automated security scanning. SOC
+            2 Type II compliance for enterprise sales.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════════ FOOTER ═══════════════ -->
+    <footer class="footer">
+      <div class="footer-brand">⚡ ULTRAGRAVITY</div>
+      <div class="footer-meta">
+        Project Singularity — Confidential PRD v0.1.0<br>
+        Designed to out-execute, out-scale, and out-secure OpenClaw<br>
+        Architecture designed by Claude · February 2026
+      </div>
+    </footer>
+
+  </div>
+
+  <script>
+    // Highlight active nav item based on scroll position
+    const sections = document.querySelectorAll('section[id], header[id]');
+    const navLinks = document.querySelectorAll('.nav a');
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const id = entry.target.id;
+          navLinks.forEach(link => {
+            link.style.color = link.href.endsWith('#' + id) ? 'var(--plasma)' : '';
+            if (link.href.endsWith('#' + id)) {
+              link.querySelector('.dot').style.background = 'var(--plasma)';
+            } else {
+              link.querySelector('.dot').style.background = '';
+            }
+          });
+        }
+      });
+    }, { threshold: 0.2 });
+
+    sections.forEach(s => observer.observe(s));
+
+    // Animate perf bars on scroll
+    const bars = document.querySelectorAll('.perf-bar-fill');
+    const barObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const bar = entry.target;
+          const width = bar.style.width;
+          bar.style.width = '0';
+          setTimeout(() => { bar.style.width = width; }, 100);
+          barObserver.unobserve(bar);
+        }
+      });
+    }, { threshold: 0.5 });
+
+    bars.forEach(b => barObserver.observe(b));
+  </script>
+</body>
+
+</html>
